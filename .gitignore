@@ -31,3 +31,6 @@
 *.out
 *.app
 
+# Build Directory
+build/
+
