@@ -2,6 +2,12 @@
 #include <GLFW/glfw3.h>
 
 #include <iostream>
+#include <cmath>
+
+#include "Shader.h"
+#include "VertexArray.h"
+#include "VertexBuffer.h"
+#include "IndexBuffer.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int heigth);
 void process_input(GLFWwindow* window);
@@ -9,26 +15,6 @@ void process_input(GLFWwindow* window);
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 800;
-
-const char* vertext_shader_source = R"(
-#version 330 core
-
-layout(location = 0) in vec3 aPos;
-
-void main() {
-    gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
-}
-)";
-
-const char* fragment_shader_source = R"(
-#version 330 core
-
-out vec4 frag_color;
-
-void main() {
-    frag_color = vec4(0.2f, 0.3f, 0.8f, 1.0f);
-}
-)";
 
 int main() {
     // glfw: initialize and configure
@@ -64,56 +50,20 @@ int main() {
 
     // build and compile shader program
     // --------------------------------
-    int success;
-    char info_log[512];
+    Shader shader("../LearnOpenGL/assets/shaders/vertex.glsl", "../LearnOpenGL/assets/shaders/fragment.glsl");
 
-    // vertex shader
-    unsigned int vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertex_shader, 1, &vertext_shader_source, NULL);
-    glCompileShader(vertex_shader);
-
-    // check for shader compile errors
-    glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &success);
-    if (!success) {
-        glGetShaderInfoLog(vertex_shader, 512, NULL, info_log);
-        std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << info_log << std::endl;
-    }
-
-    // fragment shader
-    unsigned int fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragment_shader, 1, &fragment_shader_source, NULL);
-    glCompileShader(fragment_shader);
-
-    // check for shader compile errors
-    glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &success);
-    if (!success) {
-        glGetShaderInfoLog(fragment_shader, 512, NULL, info_log);
-        std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << info_log << std::endl;
-    }
-
-    // create shader program and link shaders
-    unsigned int shader_program = glCreateProgram();
-    glAttachShader(shader_program, vertex_shader);
-    glAttachShader(shader_program, fragment_shader);
-    glLinkProgram(shader_program);
-
-    // check for shader linking errors
-    glGetProgramiv(shader_program, GL_LINK_STATUS, &success);
-    if (!success) {
-        glGetProgramInfoLog(shader_program, 512, NULL, info_log);
-        std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << info_log << std::endl;
-    }
-
-    glDeleteShader(vertex_shader);
-    glDeleteShader(fragment_shader);
+    int nrAttributes;
+    glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
+    std::cout << "Maximum number of vertex attributes supported: " << nrAttributes << std::endl;
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
     float vertices[] = {
-         0.5f,  0.5f, 0.0f,     // top right
-         0.5f, -0.5f, 0.0f,     // bottom right
-        -0.5f, -0.5f, 0.0f,     // bottom left
-        -0.5f,  0.5f, 0.0f      // top left
+        // positions        //colors
+         0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f,     // top right
+         0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,     // bottom right
+        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f,     // bottom left
+        -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 1.0f      // top left
     };
 
     unsigned int indices[] = {
@@ -121,32 +71,27 @@ int main() {
         1, 2, 3     // second triangle
     };
 
-    unsigned int vao;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
+    VertextArray vao;
+    vao.Bind();
 
-    unsigned int vbo;
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    VertexBuffer vbo(vertices, sizeof(vertices), GL_STATIC_DRAW);
+    vbo.Bind();
 
-    unsigned int ebo;
-    glGenBuffers(1, &ebo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+    IndexBuffer ebo(indices, sizeof(indices), GL_STATIC_DRAW);
+    ebo.Bind();
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
+    vao.LinkAttrib(0, 3, GL_FLOAT, 6 * sizeof(float), (void*)0);
+    vao.LinkAttrib(1, 3, GL_FLOAT, 6 * sizeof(float), (void*)(3 * sizeof(float)));
 
     // this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    vbo.Unbind();
 
     // do NOT unbind the EBO while a VAO is active as the bound EBO is stored in the VAO; keep the EBO bound
-    // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    // ebo.Unbind();
 
     // we can unbind the VAO afterwards so othe VAO call won't accidentally modify this VAO, but this rarely happens. Modifying other
     // VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
-    glBindVertexArray(0);
+    vao.Unbind();
 
     // uncomment this call to draw in wireframe polygons.
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -161,9 +106,19 @@ int main() {
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glUseProgram(shader_program);
-        glBindVertexArray(vao);
+        // activate the shader
+        shader.Use();
+
+        // update the uniform color
+        float time_value = glfwGetTime();
+        float blue_value = (sin(time_value) / 2.0f) + 0.5f;
+        // int vertex_color_location = glGetUniformLocation(shader_program, "our_color");
+        // glUniform4f(vertex_color_location, 0.0f, 0.0f, blue_value, 1.0f);
+
+        // render the quad
+        vao.Bind();
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        vao.Unbind();
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         glfwPollEvents();
@@ -172,10 +127,10 @@ int main() {
 
     // optional: de-allocate all resources once they've outlived their purpose
     // -----------------------------------------------------------------------
-    glDeleteVertexArrays(1, &vao);
-    glDeleteBuffers(1, &vbo);
-    glDeleteBuffers(1, &ebo);
-    glDeleteProgram(shader_program);
+    vao.Destroy();
+    vbo.Destroy();
+    ebo.Destroy();
+    shader.Destroy();
 
     // glfw: terminate, clearing all previously allocated GLFW resources.
     glfwTerminate();
