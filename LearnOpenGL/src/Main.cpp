@@ -1,5 +1,6 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <stb_image.h>
 
 #include <iostream>
 #include <cmath>
@@ -59,16 +60,23 @@ int main() {
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
     float vertices[] = {
-        // positions        //colors
-         0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f,     // top right
-         0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,     // bottom right
-        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f,     // bottom left
-        -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 1.0f      // top left
+        // positions        //colors          // texture coords
+         0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,     // top right
+         0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,     // bottom right
+        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,     // bottom left
+        -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f      // top left
     };
 
     unsigned int indices[] = {
         0, 1, 3,    // first triangle
         1, 2, 3     // second triangle
+    };
+
+    float tex_coords[] = {
+        0.0f, 0.0f, // lower-left corner
+        1.0f, 0.0f, // lower-right corner
+        0.0f, 1.0f, // upper-left corner
+        1.0f, 1.0f  // upper-right corner
     };
 
     VertextArray vao;
@@ -80,8 +88,9 @@ int main() {
     IndexBuffer ebo(indices, sizeof(indices), GL_STATIC_DRAW);
     ebo.Bind();
 
-    vao.LinkAttrib(0, 3, GL_FLOAT, 6 * sizeof(float), (void*)0);
-    vao.LinkAttrib(1, 3, GL_FLOAT, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    vao.LinkAttrib(0, 3, GL_FLOAT, 8 * sizeof(float), (void*)0);
+    vao.LinkAttrib(1, 3, GL_FLOAT, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    vao.LinkAttrib(2, 2, GL_FLOAT, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 
     // this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
     vbo.Unbind();
@@ -96,6 +105,60 @@ int main() {
     // uncomment this call to draw in wireframe polygons.
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
+    // load and create a texture
+    // -------------------------
+    unsigned int texture1, texture2;
+    glGenTextures(1, &texture1);
+    glBindTexture(GL_TEXTURE_2D, texture1);
+
+    // set the texture wrapping parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    // set the texture filtering parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // load image, create texture and generate mipmaps
+    int width, height, nrChannels;
+    stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded textures on the y-axis
+    unsigned char* data = stbi_load("../LearnOpenGL/assets/textures/container.jpg", &width, &height, &nrChannels, 0);
+    if (!data) {
+        std::cout << "Failed to load texture" << std::endl;
+    }
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+    glGenerateMipmap(GL_TEXTURE_2D);
+    stbi_image_free(data);
+
+    // load and create a texture
+    // -------------------------
+    glGenTextures(1, &texture2);
+    glBindTexture(GL_TEXTURE_2D, texture2);
+
+    // set the texture wrapping parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    // set the texture filtering parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // load image, create texture and generate mipmaps
+    // int width, height, nrChannels;
+    data = stbi_load("../LearnOpenGL/assets/textures/awesomeface.png", &width, &height, &nrChannels, 0);
+    if (!data) {
+        std::cout << "Failed to load texture" << std::endl;
+    }
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    glGenerateMipmap(GL_TEXTURE_2D);
+    stbi_image_free(data);
+
+    shader.Use();
+    shader.SetInt("texture1", 0);
+    shader.SetInt("texture2", 1);
+
     // render loop
     // -----------
     while (!glfwWindowShouldClose(window)) {
@@ -106,14 +169,14 @@ int main() {
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
+        // bind texture
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture1);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, texture2);
+
         // activate the shader
         shader.Use();
-
-        // update the uniform color
-        float time_value = glfwGetTime();
-        float blue_value = (sin(time_value) / 2.0f) + 0.5f;
-        // int vertex_color_location = glGetUniformLocation(shader_program, "our_color");
-        // glUniform4f(vertex_color_location, 0.0f, 0.0f, blue_value, 1.0f);
 
         // render the quad
         vao.Bind();
