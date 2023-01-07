@@ -15,6 +15,7 @@ include_directories(vendor/glm)
 
 file(GLOB SOURCES LearnOpenGL/src/*.h LearnOpenGL/src/*.cpp LearnOpenGL/src/*.c)
 add_executable(LearnOpenGL ${SOURCES})
+set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT LearnOpenGL)
 
 add_subdirectory(vendor/glad)
 target_link_libraries(LearnOpenGL glad)
