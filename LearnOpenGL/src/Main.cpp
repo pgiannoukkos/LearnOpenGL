@@ -44,6 +44,7 @@ int main() {
         return -1;
     }
     glfwMakeContextCurrent(window);
+    glfwSwapInterval(1);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
     // glad: load all OpenGL function pointers
@@ -164,9 +165,22 @@ int main() {
     shader.SetInt("texture1", 0);
     shader.SetInt("texture2", 1);
 
+    double last_time = glfwGetTime();
+    int nb_frames = 0;
+
     // render loop
     // -----------
     while (!glfwWindowShouldClose(window)) {
+        double current_time = glfwGetTime();
+        nb_frames++;
+
+        if (current_time - last_time >= 1.0) {
+            double ms_per_frame = 1000.0 / double(nb_frames);
+            printf("%.2f ms/frame - %d fps\n", ms_per_frame, nb_frames);
+            nb_frames = 0;
+            last_time += 1.0;
+        }
+
         // input
         process_input(window);
 
