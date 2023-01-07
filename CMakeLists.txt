@@ -11,6 +11,7 @@ find_package(OpenGL REQUIRED)
 include_directories(vendor/glfw/include)
 include_directories(vendor/glad/include)
 include_directories(vendor/stb_image)
+include_directories(vendor/glm)
 
 file(GLOB SOURCES LearnOpenGL/src/*.h LearnOpenGL/src/*.cpp LearnOpenGL/src/*.c)
 add_executable(LearnOpenGL ${SOURCES})

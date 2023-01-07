@@ -1,6 +1,9 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <stb_image.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include <iostream>
 #include <cmath>
@@ -9,6 +12,8 @@
 #include "VertexArray.h"
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
+#include "glm/ext/matrix_transform.hpp"
+#include "glm/fwd.hpp"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int heigth);
 void process_input(GLFWwindow* window);
@@ -174,6 +179,12 @@ int main() {
         glBindTexture(GL_TEXTURE_2D, texture1);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, texture2);
+
+        glm::mat4 transform = glm::mat4(1.0f);
+        transform = glm::translate(transform, glm::vec3(0.5, -0.5, 0.0));
+        transform = glm::scale(transform, glm::vec3(0.5, 0.5, 0.5));
+        transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0, 0.0, 1.0));
+        shader.SetMat4("transform", transform);
 
         // activate the shader
         shader.Use();
