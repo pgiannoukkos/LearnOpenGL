@@ -25,13 +25,16 @@ const int SCR_WIDTH = 800;
 const int SCR_HEIGHT = 600;
 
 // camera
-Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+Camera camera(glm::vec3(0.0f, 0.0f, 5.0f));
 float last_x = SCR_WIDTH / 2.0f;
 float last_y = SCR_HEIGHT / 2.0f;
 bool first_mouse = true;
 
 // timing
 float delta_time = 0.0f;    // Time between current frame and last frame
+
+// lighting
+glm::vec3 light_pos(1.2f, 1.0f, 2.0f);
 
 int main() {
     // glfw: initialize and configure
@@ -78,170 +81,75 @@ int main() {
 
     // build and compile shader program
     // --------------------------------
-    Shader shader("LearnOpenGL/assets/shaders/vertex.glsl", "LearnOpenGL/assets/shaders/fragment.glsl");
-
-    // int nrAttributes;
-    // glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
-    // std::cout << "Maximum number of vertex attributes supported: " << nrAttributes << std::endl;
+    Shader lighting_shader("LearnOpenGL/assets/shaders/lighting_vs.glsl", "LearnOpenGL/assets/shaders/lighting_fs.glsl");
+    Shader light_cube_shader("LearnOpenGL/assets/shaders/light_cube_vs.glsl", "LearnOpenGL/assets/shaders/light_cube_fs.glsl");
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
-    // float vertices[] = {
-    //     // positions        //colors          // texture coords
-    //      0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,     // top right
-    //      0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,     // bottom right
-    //     -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,     // bottom left
-    //     -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f      // top left
-    // };
-
     float vertices[] = {
-        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-        0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-        0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-        0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f, -0.5f,
+         0.5f,  0.5f, -0.5f,
+         0.5f,  0.5f, -0.5f,
+        -0.5f,  0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f,
 
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-        0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-        0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-        0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f,
+         0.5f, -0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f,
+        -0.5f, -0.5f,  0.5f,
 
-        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f,
+        -0.5f, -0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f,
 
-        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-        0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-        0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-        0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-        0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,
+         0.5f,  0.5f, -0.5f,
+         0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,
 
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-        0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-        0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-        0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f,  0.5f,
+         0.5f, -0.5f,  0.5f,
+        -0.5f, -0.5f,  0.5f,
+        -0.5f, -0.5f, -0.5f,
 
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-        0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+        -0.5f,  0.5f, -0.5f,
+         0.5f,  0.5f, -0.5f,
+         0.5f,  0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f, -0.5f,
     };
 
-    // world space positions of our cubes
-    glm::vec3 cube_positions[] = {
-        glm::vec3( 0.0f,  0.0f,  0.0f),
-        glm::vec3( 2.0f,  5.0f, -15.0f),
-        glm::vec3(-1.5f, -2.2f, -2.5f),
-        glm::vec3(-3.8f, -2.0f, -12.3f),
-        glm::vec3( 2.4f, -0.4f, -3.5f),
-        glm::vec3(-1.7f,  3.0f, -7.5f),
-        glm::vec3( 1.3f, -2.0f, -2.5f),
-        glm::vec3( 1.5f,  2.0f, -2.5f),
-        glm::vec3( 1.5f,  0.2f, -1.5f),
-        glm::vec3(-1.3f,  1.0f, -1.5f)
-    };
-
-    unsigned int indices[] = {
-        0, 1, 3,    // first triangle
-        1, 2, 3     // second triangle
-    };
-
-    float tex_coords[] = {
-        0.0f, 0.0f, // lower-left corner
-        1.0f, 0.0f, // lower-right corner
-        0.0f, 1.0f, // upper-left corner
-        1.0f, 1.0f  // upper-right corner
-    };
-
-    VertextArray vao;
-    vao.Bind();
+    // configure the cube's VAO and VBO
+    VertextArray cube_vao;
+    cube_vao.Bind();
 
     VertexBuffer vbo(vertices, sizeof(vertices), GL_STATIC_DRAW);
     vbo.Bind();
 
-    IndexBuffer ebo(indices, sizeof(indices), GL_STATIC_DRAW);
-    ebo.Bind();
+    cube_vao.LinkAttrib(0, 3, GL_FLOAT, 3 * sizeof(float), (void*)0);
+    cube_vao.Unbind();
 
-    vao.LinkAttrib(0, 3, GL_FLOAT, 5 * sizeof(float), (void*)0);
-    vao.LinkAttrib(1, 2, GL_FLOAT, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-
-    // this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
+    // configure the light's VAO
+    VertextArray light_vao;
+    light_vao.Bind();
+    vbo.Bind();
+    light_vao.LinkAttrib(0, 3, GL_FLOAT, 3 * sizeof(float), (void*)0);
+    light_vao.Unbind();
     vbo.Unbind();
-
-    // do NOT unbind the EBO while a VAO is active as the bound EBO is stored in the VAO; keep the EBO bound
-    // ebo.Unbind();
-
-    // we can unbind the VAO afterwards so othe VAO call won't accidentally modify this VAO, but this rarely happens. Modifying other
-    // VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
-    vao.Unbind();
 
     // uncomment this call to draw in wireframe polygons.
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-    // load and create a texture
-    // -------------------------
-    unsigned int texture1, texture2;
-    glGenTextures(1, &texture1);
-    glBindTexture(GL_TEXTURE_2D, texture1);
-
-    // set the texture wrapping parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-    // set the texture filtering parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    // load image, create texture and generate mipmaps
-    int width, height, nrChannels;
-    stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded textures on the y-axis
-    unsigned char* data = stbi_load("LearnOpenGL/assets/textures/container.jpg", &width, &height, &nrChannels, 0);
-    if (!data) {
-        std::cout << "Failed to load texture" << std::endl;
-    }
-
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-    glGenerateMipmap(GL_TEXTURE_2D);
-    stbi_image_free(data);
-
-    // load and create a texture
-    // -------------------------
-    glGenTextures(1, &texture2);
-    glBindTexture(GL_TEXTURE_2D, texture2);
-
-    // set the texture wrapping parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-    // set the texture filtering parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    // load image, create texture and generate mipmaps
-    // int width, height, nrChannels;
-    data = stbi_load("LearnOpenGL/assets/textures/awesomeface.png", &width, &height, &nrChannels, 0);
-    if (!data) {
-        std::cout << "Failed to load texture" << std::endl;
-    }
-
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-    glGenerateMipmap(GL_TEXTURE_2D);
-    stbi_image_free(data);
-
-    shader.Use();
-    shader.SetInt("texture1", 0);
-    shader.SetInt("texture2", 1);
 
     float last_time = static_cast<float>(glfwGetTime());
 
@@ -260,34 +168,34 @@ int main() {
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // bind texture
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture1);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, texture2);
+        lighting_shader.Use();
+        lighting_shader.SetVec3("object_color", 1.0f, 0.5f, 0.31f);
+        lighting_shader.SetVec3("light_color", 1.0f, 1.0f, 1.0f);
 
-        // activate the shader
-        shader.Use();
-
-        // Perspective Projection
         glm::mat4 projection = glm::perspective(glm::radians(camera.m_Zoom), (float)SCR_WIDTH/(float)SCR_HEIGHT, 0.1f, 100.0f);
-        shader.SetMat4("projection", projection);
-
-        // camera/view transformation
         glm::mat4 view = camera.GetViewMatrix();
-        shader.SetMat4("view", view);
+        lighting_shader.SetMat4("projection", projection);
+        lighting_shader.SetMat4("view", view);
 
-        // render boxes
-        vao.Bind();
-        for (unsigned int i = 0; i < 10; i++) {
-            glm::mat4 model = glm::mat4(1.0f);
-            model = glm::translate(model, cube_positions[i]);
-            float angle = 20.0f * i;
-            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-            shader.SetMat4("model", model);
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-        }
-        vao.Unbind();
+        // world transformation
+        glm::mat4 model = glm::mat4(1.0f);
+        lighting_shader.SetMat4("model", model);
+
+        // render the cube
+        cube_vao.Bind();
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        // also draw the lamp object
+        light_cube_shader.Use();
+        light_cube_shader.SetMat4("projection", projection);
+        light_cube_shader.SetMat4("view", view);
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, light_pos);
+        model = glm::scale(model, glm::vec3(0.2f));
+        light_cube_shader.SetMat4("model", model);
+
+        light_vao.Bind();
+        glDrawArrays(GL_TRIANGLES, 0, 36);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         glfwPollEvents();
@@ -296,10 +204,11 @@ int main() {
 
     // optional: de-allocate all resources once they've outlived their purpose
     // -----------------------------------------------------------------------
-    vao.Destroy();
+    light_vao.Destroy();
+    cube_vao.Destroy();
     vbo.Destroy();
-    ebo.Destroy();
-    shader.Destroy();
+    lighting_shader.Destroy();
+    light_cube_shader.Destroy();
 
     // glfw: terminate, clearing all previously allocated GLFW resources.
     glfwTerminate();
@@ -319,6 +228,10 @@ void process_input(GLFWwindow* window) {
         camera.ProcessKeyboard(LEFT, delta_time);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         camera.ProcessKeyboard(RIGHT, delta_time);
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+        camera.ProcessKeyboard(UPWARDS, delta_time);
+    if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+        camera.ProcessKeyboard(DOWNWARDS, delta_time);
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int heigth) {
