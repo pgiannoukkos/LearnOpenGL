@@ -78,7 +78,7 @@ int main() {
 
     // build and compile shader program
     // --------------------------------
-    Shader shader("../LearnOpenGL/assets/shaders/vertex.glsl", "../LearnOpenGL/assets/shaders/fragment.glsl");
+    Shader shader("LearnOpenGL/assets/shaders/vertex.glsl", "LearnOpenGL/assets/shaders/fragment.glsl");
 
     // int nrAttributes;
     // glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
@@ -206,7 +206,7 @@ int main() {
     // load image, create texture and generate mipmaps
     int width, height, nrChannels;
     stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded textures on the y-axis
-    unsigned char* data = stbi_load("../LearnOpenGL/assets/textures/container.jpg", &width, &height, &nrChannels, 0);
+    unsigned char* data = stbi_load("LearnOpenGL/assets/textures/container.jpg", &width, &height, &nrChannels, 0);
     if (!data) {
         std::cout << "Failed to load texture" << std::endl;
     }
@@ -230,7 +230,7 @@ int main() {
 
     // load image, create texture and generate mipmaps
     // int width, height, nrChannels;
-    data = stbi_load("../LearnOpenGL/assets/textures/awesomeface.png", &width, &height, &nrChannels, 0);
+    data = stbi_load("LearnOpenGL/assets/textures/awesomeface.png", &width, &height, &nrChannels, 0);
     if (!data) {
         std::cout << "Failed to load texture" << std::endl;
     }
