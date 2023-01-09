@@ -65,7 +65,7 @@ int main() {
     glfwSetScrollCallback(window, scroll_callback);
 
     // tell GLFW to capture our mouse
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // glad: load all OpenGL function pointers
     // ---------------------------------------
@@ -172,8 +172,25 @@ float vertices[] = {
         lighting_shader.Use();
         lighting_shader.SetVec3("light_pos", light_pos);
         lighting_shader.SetVec3("view_pos", camera.m_Position);
-        lighting_shader.SetVec3("object_color", 1.0f, 0.5f, 0.31f);
-        lighting_shader.SetVec3("light_color", 1.0f, 1.0f, 1.0f);
+
+        // light properties
+        glm::vec3 light_color;
+        light_color.x = static_cast<float>(sin(current_time * 2.0f));
+        light_color.y = static_cast<float>(sin(current_time * 0.7f));
+        light_color.z = static_cast<float>(sin(current_time * 1.3f));
+
+        glm::vec3 ambient_color = light_color * glm::vec3(0.2f);
+        glm::vec3 diffuse_color = light_color * glm::vec3(0.5f);
+
+        lighting_shader.SetVec3("light.ambient", ambient_color);
+        lighting_shader.SetVec3("light.diffuse", diffuse_color);     // darken diffuse light a bit
+        lighting_shader.SetVec3("light.specular", 1.0f, 1.0f, 1.0f);
+
+        // material properties
+        lighting_shader.SetVec3("material.ambient", 1.0f, 0.5f, 0.31f);
+        lighting_shader.SetVec3("material.diffuse", 1.0f, 0.5f, 0.31f);
+        lighting_shader.SetVec3("material.specular", 0.5f, 0.5f, 0.5f);
+        lighting_shader.SetFloat("material.shininess", 32.0f);
 
         glm::mat4 projection = glm::perspective(glm::radians(camera.m_Zoom), (float)SCR_WIDTH/(float)SCR_HEIGHT, 0.1f, 100.0f);
         glm::mat4 view = camera.GetViewMatrix();
@@ -235,7 +252,7 @@ void process_input(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
         camera.ProcessKeyboard(DOWNWARDS, delta_time);
 
-    const float speed = static_cast<float>(2.5 * delta_time);
+    const float speed = static_cast<float>(5.0f * delta_time);
     if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
         light_pos.x += speed;
     if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
@@ -255,22 +272,29 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int heigth) {
 }
 
 void mouse_callback(GLFWwindow* window, double xpos_in, double ypos_in) {
-    float xpos = static_cast<float>(xpos_in);
-    float ypos = static_cast<float>(ypos_in);
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        float xpos = static_cast<float>(xpos_in);
+        float ypos = static_cast<float>(ypos_in);
 
-    if (first_mouse) {
+        if (first_mouse)
+        {
+            last_x = xpos;
+            last_y = ypos;
+            first_mouse = false;
+        }
+
+        float xoffset = xpos - last_x;
+        float yoffset = last_y - ypos; // reversed since y-coordinates go from bottom to top
+
         last_x = xpos;
         last_y = ypos;
-        first_mouse = false;
+
+        camera.ProcessMouseMovement(xoffset, yoffset);
+    } else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE) {
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        first_mouse = true;
     }
-
-    float xoffset = xpos - last_x;
-    float yoffset = last_y - ypos;  // reversed since y-coordinates go from bottom to top
-
-    last_x = xpos;
-    last_y = ypos;
-
-    camera.ProcessMouseMovement(xoffset, yoffset);
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
