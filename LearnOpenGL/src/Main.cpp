@@ -174,8 +174,8 @@ int main() {
     vbo.Unbind();
 
     // load textures
-    Texture diffuse_map("LearnOpenGL/assets/textures/container2.png");
-    Texture specular_map("LearnOpenGL/assets/textures/container2_specular.png");
+    Texture diffuse_map("LearnOpenGL/assets/textures/container2.png", "diffuse");
+    Texture specular_map("LearnOpenGL/assets/textures/container2_specular.png", "specular");
 
     // shder configuration
 
