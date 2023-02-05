@@ -20,6 +20,7 @@ void Model::LoadModel(std::string path)
     directory = path.substr(0, path.find_last_of('/'));
     ProcessNode(scene->mRootNode, scene);
 }
+
 void Model::ProcessNode(aiNode *node, const aiScene *scene)
 {
     // process all the node's mashes (if any)
@@ -120,6 +121,7 @@ unsigned int Model::TextureFromFile(const char* path, const std::string& directo
 {
     std::string filename = std::string(path);
     filename = directory + '/' + filename;
+    std::cout << filename << std::endl;
 
     unsigned int texture_id;
     glGenTextures(1, &texture_id);
