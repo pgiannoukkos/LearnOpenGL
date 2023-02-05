@@ -8,7 +8,6 @@
 #include <string>
 #include <vector>
 
-#include "Texture.h"
 #include "Shader.h"
 #include "VertexArray.h"
 #include "VertexBuffer.h"
@@ -21,15 +20,21 @@ struct Vertex
     glm::vec2 tex_coords;
 };
 
+struct Texture2D
+{
+    unsigned int id;
+    std::string type;
+    std::string path;
+};
 
 class Mesh
 {
 public:
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
-    std::vector<Texture> textures;
+    std::vector<Texture2D> textures;
 
-    Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
+    Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture2D> textures);
 
     void Draw(Shader& shader);
 

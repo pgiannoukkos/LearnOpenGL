@@ -14,6 +14,7 @@
 #include "IndexBuffer.h"
 #include "Camera.h"
 #include "Texture.h"
+#include "Model.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int heigth);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -81,101 +82,105 @@ int main() {
 
     // build and compile shader program
     // --------------------------------
-    Shader lighting_shader("LearnOpenGL/assets/shaders/lighting_vs.glsl", "LearnOpenGL/assets/shaders/lighting_fs.glsl");
-    Shader light_cube_shader("LearnOpenGL/assets/shaders/light_cube_vs.glsl", "LearnOpenGL/assets/shaders/light_cube_fs.glsl");
+    // Shader lighting_shader("LearnOpenGL/assets/shaders/lighting_vs.glsl", "LearnOpenGL/assets/shaders/lighting_fs.glsl");
+    // Shader light_cube_shader("LearnOpenGL/assets/shaders/light_cube_vs.glsl", "LearnOpenGL/assets/shaders/light_cube_fs.glsl");
+    Shader shader("LearnOpenGL/assets/shaders/model_loading_vs.glsl", "LearnOpenGL/assets/shaders/model_loading_fs.glsl");
+
+    // load models
+    Model our_model("LearnOpenGL/assets/models/backpack/backpack.obj");
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
-    float vertices[] = {
-        // positions          // normals           // texture coords
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
-         0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
+    // float vertices[] = {
+    //     // positions          // normals           // texture coords
+    //     -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
+    //      0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
+    //      0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+    //      0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+    //     -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f,
+    //     -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
 
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
-         0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  0.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
+    //     -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
+    //      0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  0.0f,
+    //      0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+    //      0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+    //     -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f,
+    //     -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
 
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+    //     -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+    //     -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
+    //     -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+    //     -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+    //     -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+    //     -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
 
-         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-         0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
-         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-         0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+    //      0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+    //      0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
+    //      0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+    //      0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+    //      0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+    //      0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
 
-        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
-         0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  1.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
+    //     -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
+    //      0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  1.0f,
+    //      0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+    //      0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+    //     -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,
+    //     -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
 
-        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  1.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
-    };
+    //     -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
+    //      0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  1.0f,
+    //      0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+    //      0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+    //     -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
+    //     -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
+    // };
 
-    // positions of all containers
-    glm::vec3 cubePositions[] = {
-        glm::vec3(0.0f, 0.0f, 0.0f),
-        glm::vec3(2.0f, 5.0f, -15.0f),
-        glm::vec3(-1.5f, -2.2f, -2.5f),
-        glm::vec3(-3.8f, -2.0f, -12.3f),
-        glm::vec3(2.4f, -0.4f, -3.5f),
-        glm::vec3(-1.7f, 3.0f, -7.5f),
-        glm::vec3(1.3f, -2.0f, -2.5f),
-        glm::vec3(1.5f, 2.0f, -2.5f),
-        glm::vec3(1.5f, 0.2f, -1.5f),
-        glm::vec3(-1.3f, 1.0f, -1.5f)
-    };
+    // // positions of all containers
+    // glm::vec3 cubePositions[] = {
+    //     glm::vec3(0.0f, 0.0f, 0.0f),
+    //     glm::vec3(2.0f, 5.0f, -15.0f),
+    //     glm::vec3(-1.5f, -2.2f, -2.5f),
+    //     glm::vec3(-3.8f, -2.0f, -12.3f),
+    //     glm::vec3(2.4f, -0.4f, -3.5f),
+    //     glm::vec3(-1.7f, 3.0f, -7.5f),
+    //     glm::vec3(1.3f, -2.0f, -2.5f),
+    //     glm::vec3(1.5f, 2.0f, -2.5f),
+    //     glm::vec3(1.5f, 0.2f, -1.5f),
+    //     glm::vec3(-1.3f, 1.0f, -1.5f)
+    // };
 
-    // positions of the point lights
-    glm::vec3 pointLightPositions[] = {
-        glm::vec3(0.7f, 0.2f, 2.0f),
-        glm::vec3(2.3f, -3.3f, -4.0f),
-        glm::vec3(-4.0f, 2.0f, -12.0f),
-        glm::vec3(0.0f, 0.0f, -3.0f)
-    };
+    // // positions of the point lights
+    // glm::vec3 pointLightPositions[] = {
+    //     glm::vec3(0.7f, 0.2f, 2.0f),
+    //     glm::vec3(2.3f, -3.3f, -4.0f),
+    //     glm::vec3(-4.0f, 2.0f, -12.0f),
+    //     glm::vec3(0.0f, 0.0f, -3.0f)
+    // };
 
-    // configure the cube's VAO and VBO
-    VertextArray cube_vao;
-    cube_vao.Bind();
+    // // configure the cube's VAO and VBO
+    // VertextArray cube_vao;
+    // cube_vao.Bind();
 
-    VertexBuffer vbo(vertices, sizeof(vertices), GL_STATIC_DRAW);
-    vbo.Bind();
+    // VertexBuffer vbo(vertices, sizeof(vertices), GL_STATIC_DRAW);
+    // vbo.Bind();
 
-    cube_vao.LinkAttrib(0, 3, GL_FLOAT, 8 * sizeof(float), (void*)0);
-    cube_vao.LinkAttrib(1, 3, GL_FLOAT, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-    cube_vao.LinkAttrib(2, 2, GL_FLOAT, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-    cube_vao.Unbind();
+    // cube_vao.LinkAttrib(0, 3, GL_FLOAT, 8 * sizeof(float), (void*)0);
+    // cube_vao.LinkAttrib(1, 3, GL_FLOAT, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    // cube_vao.LinkAttrib(2, 2, GL_FLOAT, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    // cube_vao.Unbind();
 
-    // configure the light's VAO
-    VertextArray light_vao;
-    light_vao.Bind();
-    vbo.Bind();
-    light_vao.LinkAttrib(0, 3, GL_FLOAT, 8 * sizeof(float), (void*)0);
-    light_vao.Unbind();
-    vbo.Unbind();
+    // // configure the light's VAO
+    // VertextArray light_vao;
+    // light_vao.Bind();
+    // vbo.Bind();
+    // light_vao.LinkAttrib(0, 3, GL_FLOAT, 8 * sizeof(float), (void*)0);
+    // light_vao.Unbind();
+    // vbo.Unbind();
 
-    // load textures
-    Texture diffuse_map("LearnOpenGL/assets/textures/container2.png", "diffuse");
-    Texture specular_map("LearnOpenGL/assets/textures/container2_specular.png", "specular");
+    // // load textures
+    // Texture diffuse_map("LearnOpenGL/assets/textures/container2.png", "diffuse");
+    // Texture specular_map("LearnOpenGL/assets/textures/container2_specular.png", "specular");
 
     // shder configuration
 
@@ -199,102 +204,107 @@ int main() {
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        lighting_shader.Use();
-        lighting_shader.SetVec3("view_pos", camera.m_Position);
+        shader.Use();
 
-        // directional light
-        lighting_shader.SetVec3("dir_light.direction", -0.2f, -1.0f, -0.3f);
-        lighting_shader.SetVec3("dir_light.ambient", 0.05f, 0.05f, 0.05f);
-        lighting_shader.SetVec3("dir_light.diffuse", 0.4f, 0.4f, 0.4f);
-        lighting_shader.SetVec3("dir_light.specular", 0.5f, 0.5f, 0.5f);
+        // lighting_shader.Use();
+        // lighting_shader.SetVec3("view_pos", camera.m_Position);
 
-        // point light 1
-        lighting_shader.SetVec3("point_lights[0].position", pointLightPositions[0]);
-        lighting_shader.SetVec3("point_lights[0].ambient", 0.05f, 0.05f, 0.05f);
-        lighting_shader.SetVec3("point_lights[0].diffuse", 0.8f, 0.8f, 0.8f);
-        lighting_shader.SetVec3("point_lights[0].specular", 1.0f, 1.0f, 1.0f);
-        lighting_shader.SetFloat("point_lights[0].constant", 1.0f);
-        lighting_shader.SetFloat("point_lights[0].linear", 0.09f);
-        lighting_shader.SetFloat("point_lights[0].quadratic", 0.032f);
-        // point light 2
-        lighting_shader.SetVec3("point_lights[1].position", pointLightPositions[1]);
-        lighting_shader.SetVec3("point_lights[1].ambient", 0.05f, 0.05f, 0.05f);
-        lighting_shader.SetVec3("point_lights[1].diffuse", 0.8f, 0.8f, 0.8f);
-        lighting_shader.SetVec3("point_lights[1].specular", 1.0f, 1.0f, 1.0f);
-        lighting_shader.SetFloat("point_lights[1].constant", 1.0f);
-        lighting_shader.SetFloat("point_lights[1].linear", 0.09f);
-        lighting_shader.SetFloat("point_lights[1].quadratic", 0.032f);
-        // point light 3
-        lighting_shader.SetVec3("point_lights[2].position", pointLightPositions[2]);
-        lighting_shader.SetVec3("point_lights[2].ambient", 0.05f, 0.05f, 0.05f);
-        lighting_shader.SetVec3("point_lights[2].diffuse", 0.8f, 0.8f, 0.8f);
-        lighting_shader.SetVec3("point_lights[2].specular", 1.0f, 1.0f, 1.0f);
-        lighting_shader.SetFloat("point_lights[2].constant", 1.0f);
-        lighting_shader.SetFloat("point_lights[2].linear", 0.09f);
-        lighting_shader.SetFloat("point_lights[2].quadratic", 0.032f);
-        // point light 4
-        lighting_shader.SetVec3("point_lights[3].position", pointLightPositions[3]);
-        lighting_shader.SetVec3("point_lights[3].ambient", 0.05f, 0.05f, 0.05f);
-        lighting_shader.SetVec3("point_lights[3].diffuse", 0.8f, 0.8f, 0.8f);
-        lighting_shader.SetVec3("point_lights[3].specular", 1.0f, 1.0f, 1.0f);
-        lighting_shader.SetFloat("point_lights[3].constant", 1.0f);
-        lighting_shader.SetFloat("point_lights[3].linear", 0.09f);
-        lighting_shader.SetFloat("point_lights[3].quadratic", 0.032f);
+        // // directional light
+        // lighting_shader.SetVec3("dir_light.direction", -0.2f, -1.0f, -0.3f);
+        // lighting_shader.SetVec3("dir_light.ambient", 0.05f, 0.05f, 0.05f);
+        // lighting_shader.SetVec3("dir_light.diffuse", 0.4f, 0.4f, 0.4f);
+        // lighting_shader.SetVec3("dir_light.specular", 0.5f, 0.5f, 0.5f);
 
-        // spotLight
-        lighting_shader.SetVec3("spot_light.position", camera.m_Position);
-        lighting_shader.SetVec3("spot_light.direction", camera.m_Front);
-        lighting_shader.SetVec3("spot_light.ambient", 0.0f, 0.0f, 0.0f);
-        lighting_shader.SetVec3("spot_light.diffuse", 1.0f, 1.0f, 1.0f);
-        lighting_shader.SetVec3("spot_light.specular", 1.0f, 1.0f, 1.0f);
-        lighting_shader.SetFloat("spot_light.constant", 1.0f);
-        lighting_shader.SetFloat("spot_light.linear", 0.09f);
-        lighting_shader.SetFloat("spot_light.quadratic", 0.032f);
-        lighting_shader.SetFloat("spot_light.cut_off", glm::cos(glm::radians(12.5f)));
-        lighting_shader.SetFloat("spot_light.outer_cut_off", glm::cos(glm::radians(15.0f)));
+        // // point light 1
+        // lighting_shader.SetVec3("point_lights[0].position", pointLightPositions[0]);
+        // lighting_shader.SetVec3("point_lights[0].ambient", 0.05f, 0.05f, 0.05f);
+        // lighting_shader.SetVec3("point_lights[0].diffuse", 0.8f, 0.8f, 0.8f);
+        // lighting_shader.SetVec3("point_lights[0].specular", 1.0f, 1.0f, 1.0f);
+        // lighting_shader.SetFloat("point_lights[0].constant", 1.0f);
+        // lighting_shader.SetFloat("point_lights[0].linear", 0.09f);
+        // lighting_shader.SetFloat("point_lights[0].quadratic", 0.032f);
+        // // point light 2
+        // lighting_shader.SetVec3("point_lights[1].position", pointLightPositions[1]);
+        // lighting_shader.SetVec3("point_lights[1].ambient", 0.05f, 0.05f, 0.05f);
+        // lighting_shader.SetVec3("point_lights[1].diffuse", 0.8f, 0.8f, 0.8f);
+        // lighting_shader.SetVec3("point_lights[1].specular", 1.0f, 1.0f, 1.0f);
+        // lighting_shader.SetFloat("point_lights[1].constant", 1.0f);
+        // lighting_shader.SetFloat("point_lights[1].linear", 0.09f);
+        // lighting_shader.SetFloat("point_lights[1].quadratic", 0.032f);
+        // // point light 3
+        // lighting_shader.SetVec3("point_lights[2].position", pointLightPositions[2]);
+        // lighting_shader.SetVec3("point_lights[2].ambient", 0.05f, 0.05f, 0.05f);
+        // lighting_shader.SetVec3("point_lights[2].diffuse", 0.8f, 0.8f, 0.8f);
+        // lighting_shader.SetVec3("point_lights[2].specular", 1.0f, 1.0f, 1.0f);
+        // lighting_shader.SetFloat("point_lights[2].constant", 1.0f);
+        // lighting_shader.SetFloat("point_lights[2].linear", 0.09f);
+        // lighting_shader.SetFloat("point_lights[2].quadratic", 0.032f);
+        // // point light 4
+        // lighting_shader.SetVec3("point_lights[3].position", pointLightPositions[3]);
+        // lighting_shader.SetVec3("point_lights[3].ambient", 0.05f, 0.05f, 0.05f);
+        // lighting_shader.SetVec3("point_lights[3].diffuse", 0.8f, 0.8f, 0.8f);
+        // lighting_shader.SetVec3("point_lights[3].specular", 1.0f, 1.0f, 1.0f);
+        // lighting_shader.SetFloat("point_lights[3].constant", 1.0f);
+        // lighting_shader.SetFloat("point_lights[3].linear", 0.09f);
+        // lighting_shader.SetFloat("point_lights[3].quadratic", 0.032f);
 
-        // material properties
-        lighting_shader.SetInt("material.diffuse", 0);
-        lighting_shader.SetInt("material.specular", 1);
-        lighting_shader.SetFloat("material.shininess", 64.0f);
+        // // spotLight
+        // lighting_shader.SetVec3("spot_light.position", camera.m_Position);
+        // lighting_shader.SetVec3("spot_light.direction", camera.m_Front);
+        // lighting_shader.SetVec3("spot_light.ambient", 0.0f, 0.0f, 0.0f);
+        // lighting_shader.SetVec3("spot_light.diffuse", 1.0f, 1.0f, 1.0f);
+        // lighting_shader.SetVec3("spot_light.specular", 1.0f, 1.0f, 1.0f);
+        // lighting_shader.SetFloat("spot_light.constant", 1.0f);
+        // lighting_shader.SetFloat("spot_light.linear", 0.09f);
+        // lighting_shader.SetFloat("spot_light.quadratic", 0.032f);
+        // lighting_shader.SetFloat("spot_light.cut_off", glm::cos(glm::radians(12.5f)));
+        // lighting_shader.SetFloat("spot_light.outer_cut_off", glm::cos(glm::radians(15.0f)));
+
+        // // material properties
+        // lighting_shader.SetInt("material.diffuse", 0);
+        // lighting_shader.SetInt("material.specular", 1);
+        // lighting_shader.SetFloat("material.shininess", 64.0f);
 
         // view/projection transformations
         glm::mat4 projection = glm::perspective(glm::radians(camera.m_Zoom), (float)SCR_WIDTH/(float)SCR_HEIGHT, 0.1f, 100.0f);
         glm::mat4 view = camera.GetViewMatrix();
-        lighting_shader.SetMat4("projection", projection);
-        lighting_shader.SetMat4("view", view);
+        shader.SetMat4("projection", projection);
+        shader.SetMat4("view", view);
 
         // world transformation
         glm::mat4 model = glm::mat4(1.0f);
-        lighting_shader.SetMat4("model", model);
+        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the cornen of the screen
+        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f)); // it's a bit too big for our scene, so scale it down
+        shader.SetMat4("model", model);
+        our_model.Draw(shader);
 
-        // bind diffuse map
-        diffuse_map.Bind(0);
-        specular_map.Bind(1);
+        // // bind diffuse map
+        // diffuse_map.Bind(0);
+        // specular_map.Bind(1);
 
-        // render the cube
-        cube_vao.Bind();
-        for (unsigned int i = 0; i < 10; i++) {
-            glm::mat4 model = glm::mat4(1.0f);
-            model = glm::translate(model, cubePositions[i]);
-            float angle = 20.0f * i;
-            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-            lighting_shader.SetMat4("model", model);
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-        }
+        // // render the cube
+        // cube_vao.Bind();
+        // for (unsigned int i = 0; i < 10; i++) {
+        //     glm::mat4 model = glm::mat4(1.0f);
+        //     model = glm::translate(model, cubePositions[i]);
+        //     float angle = 20.0f * i;
+        //     model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+        //     lighting_shader.SetMat4("model", model);
+        //     glDrawArrays(GL_TRIANGLES, 0, 36);
+        // }
 
-        // also draw the lamp object
-        light_cube_shader.Use();
-        light_cube_shader.SetMat4("projection", projection);
-        light_cube_shader.SetMat4("view", view);
-        light_vao.Bind();
-        for (unsigned int i = 0; i < 4; i++) {
-            model = glm::mat4(1.0f);
-            model = glm::translate(model, pointLightPositions[i]);
-            model = glm::scale(model, glm::vec3(0.2f));
-            light_cube_shader.SetMat4("model", model);
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-        }
+        // // also draw the lamp object
+        // light_cube_shader.Use();
+        // light_cube_shader.SetMat4("projection", projection);
+        // light_cube_shader.SetMat4("view", view);
+        // light_vao.Bind();
+        // for (unsigned int i = 0; i < 4; i++) {
+        //     model = glm::mat4(1.0f);
+        //     model = glm::translate(model, pointLightPositions[i]);
+        //     model = glm::scale(model, glm::vec3(0.2f));
+        //     light_cube_shader.SetMat4("model", model);
+        //     glDrawArrays(GL_TRIANGLES, 0, 36);
+        // }
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         glfwPollEvents();
@@ -303,11 +313,11 @@ int main() {
 
     // optional: de-allocate all resources once they've outlived their purpose
     // -----------------------------------------------------------------------
-    light_vao.Destroy();
-    cube_vao.Destroy();
-    vbo.Destroy();
-    lighting_shader.Destroy();
-    light_cube_shader.Destroy();
+    // light_vao.Destroy();
+    // cube_vao.Destroy();
+    // vbo.Destroy();
+    // lighting_shader.Destroy();
+    // light_cube_shader.Destroy();
 
     // glfw: terminate, clearing all previously allocated GLFW resources.
     glfwTerminate();
