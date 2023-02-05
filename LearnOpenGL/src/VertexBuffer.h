@@ -5,6 +5,7 @@
 class VertexBuffer
 {
 public:
+    VertexBuffer() : id(0) {}
     VertexBuffer(const void* data, unsigned int size, GLenum mode);
     ~VertexBuffer() {}
 

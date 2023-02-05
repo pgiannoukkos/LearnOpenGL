@@ -4,6 +4,7 @@
 class IndexBuffer
 {
 public:
+    IndexBuffer() : id(0) {}
     IndexBuffer(const void* data, unsigned int size, GLenum mode);
     ~IndexBuffer() {}
 
