@@ -12,7 +12,7 @@ public:
     void Unbind();
     void Destroy();
 
-    void LinkAttrib(unsigned int layout, unsigned int nComponents, GLenum type, GLsizeiptr stride, void* offset);
+    void LinkAttrib(unsigned int layout, unsigned int nComponents, GLenum type, GLsizei stride, void* offset);
 
 private:
     unsigned int id;

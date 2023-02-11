@@ -1,6 +1,6 @@
 #include "IndexBuffer.h"
 
-IndexBuffer::IndexBuffer(const void* data, unsigned int size, GLenum mode)
+IndexBuffer::IndexBuffer(const void* data, size_t size, GLenum mode)
 {
     glGenBuffers(1, &id);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id);
