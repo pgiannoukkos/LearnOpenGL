@@ -12,6 +12,7 @@
 #include <iostream>
 #include <cmath>
 
+#include "Log.h"
 #include "Shader.h"
 #include "VertexArray.h"
 #include "VertexBuffer.h"
@@ -25,6 +26,13 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void process_input(GLFWwindow* window);
 void InitImGui(GLFWwindow* window);
+void PrintGLFWInfo(GLFWwindow* window);
+void PrintGLInfo();
+
+static void GLFWErrorCallback(int error, const char* description)
+{
+    LOG_ERROR("GLFW Error {0}: {1}", error, description);
+}
 
 // settings
 const int SCR_WIDTH = 800;
@@ -43,10 +51,13 @@ float delta_time = 0.0f;    // Time between current frame and last frame
 glm::vec3 light_pos(1.2f, 1.0f, 2.0f);
 
 int main() {
+    // Initialize Logging
+    Log::Init();
+
     // glfw: initialize and configure
     // ------------------------------
     if (!glfwInit()) {
-        std::cout << "Failed to initialize GLFW." << std::endl;
+        LOG_FATAL("Failed to initialize GLFW.");
         return -1;
     }
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -59,7 +70,7 @@ int main() {
     // glfw window creation
     GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
     if (!window) {
-        std::cout << "Failed to create GLFW window" << std::endl;
+        LOG_FATAL("Failed to create GLFW window");
         glfwTerminate();
         return -1;
     }
@@ -76,15 +87,19 @@ int main() {
     // glad: load all OpenGL function pointers
     // ---------------------------------------
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-        std::cout << "Failed to initialize GLAD" << std::endl;
+        LOG_FATAL("Failed to initialize GLAD");
         glfwTerminate();
         return -1;
     }
 
+    // Print info
+    // ---------------------------------
+    PrintGLFWInfo(window);
+    PrintGLInfo();
+
     // configure global OpenGL state
     // -----------------------------
     glEnable(GL_DEPTH_TEST);
-
 
     // initialize ImGui
     // ----------------
@@ -199,7 +214,7 @@ int main() {
 
     bool show_demo_window = true;
     bool show_another_window = false;
-    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+    ImVec4 clear_color = ImVec4(0.1f, 0.1f, 0.1f, 1.00f);
 
     float last_time = static_cast<float>(glfwGetTime());
 
@@ -215,7 +230,8 @@ int main() {
         process_input(window);
 
         // render
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        // glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         shader.Use();
@@ -367,8 +383,6 @@ int main() {
         int display_w, display_h;
         glfwGetFramebufferSize(window, &display_w, &display_h);
         // glViewport(0, 0, display_w, display_h);
-        // glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
-        // glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         // Update and Render additional Platform Windows
@@ -494,4 +508,28 @@ void InitImGui(GLFWwindow* window)
     // Setup Platform/Renderer backends
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 330 core");
+}
+
+void PrintGLFWInfo(GLFWwindow* window)
+{
+    int p = glfwGetWindowAttrib(window, GLFW_OPENGL_PROFILE);
+    std::string version = glfwGetVersionString();
+    std::string opengl_profile = "";
+
+    if (p == GLFW_OPENGL_COMPAT_PROFILE) {
+        opengl_profile = "OpenGL Compatibility Profile";
+    } else if (p == GLFW_OPENGL_CORE_PROFILE) {
+        opengl_profile = "OpenGL Core Profile";
+    }
+
+    LOG_INFO("GLFW: {0}", version.c_str());
+    LOG_INFO("GLFW: {0} {1}", opengl_profile.c_str(), p);
+}
+
+void PrintGLInfo()
+{
+    LOG_INFO("OpenGL: GL version {0}", (const char*)glGetString(GL_VERSION));
+    LOG_INFO("OpenGL: GLSL version: {0}", (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION));
+    LOG_INFO("OpenGL: Vendor: {0}", (const char*)glGetString(GL_VENDOR));
+    LOG_INFO("OpenGL: Renderer: {0}", (const char*)glGetString(GL_RENDERER));
 }

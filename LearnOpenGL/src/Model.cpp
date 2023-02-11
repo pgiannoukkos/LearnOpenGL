@@ -1,5 +1,7 @@
 #include "Model.h"
 
+#include "Log.h"
+
 void Model::Draw(Shader &shader)
 {
     for (unsigned int i = 0; i < meshes.size(); i++) {
@@ -9,11 +11,12 @@ void Model::Draw(Shader &shader)
 
 void Model::LoadModel(std::string path)
 {
+    LOG_INFO("Assimp: Loading Model: {0}", path.c_str());
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-        std::cout << "ERROR::ASSIMP::" << importer.GetErrorString() << std::endl;
+        LOG_ERROR("Assimp: {0}", importer.GetErrorString());
         return;
     }
 
@@ -121,7 +124,7 @@ unsigned int Model::TextureFromFile(const char* path, const std::string& directo
 {
     std::string filename = std::string(path);
     filename = directory + '/' + filename;
-    std::cout << filename << std::endl;
+    LOG_TRACE("Texture: {0}", filename);
 
     unsigned int texture_id;
     glGenTextures(1, &texture_id);
@@ -149,8 +152,9 @@ unsigned int Model::TextureFromFile(const char* path, const std::string& directo
 
         stbi_image_free(data);
     } else {
-        std::cout << "Texture failed to load at path: " << path << std::endl;
+        LOG_ERROR("Texture: Failed to load {0}", path);
         stbi_image_free(data);
     }
+
     return texture_id;
 }

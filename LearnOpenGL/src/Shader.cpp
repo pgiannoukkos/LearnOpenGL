@@ -1,5 +1,7 @@
 #include "Shader.h"
 
+#include "Log.h"
+
 Shader::Shader(const char* vertex_path, const char* fragment_path)
 {
     // 1. retrive the vertex/fragment source code from file path
@@ -31,7 +33,7 @@ Shader::Shader(const char* vertex_path, const char* fragment_path)
         fragment_src = f_shader_stream.str();
     }
     catch (const std::ifstream::failure e) {
-        std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
+        LOG_ERROR("SHADER: File not succesfully read.");
     }
 
     const char* v_shader_src = vertex_src.c_str();
@@ -51,7 +53,8 @@ Shader::Shader(const char* vertex_path, const char* fragment_path)
     glGetShaderiv(vertex, GL_COMPILE_STATUS, &success);
     if (!success) {
         glGetShaderInfoLog(vertex, 512, NULL, info_log);
-        std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << info_log << std::endl;
+        LOG_ERROR("Shader: Vertex Shader Compilation Failed.");
+        // std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << info_log << std::endl;
     }
 
     // fragment shader
@@ -63,7 +66,8 @@ Shader::Shader(const char* vertex_path, const char* fragment_path)
     glGetShaderiv(fragment, GL_COMPILE_STATUS, &success);
     if (!success) {
         glGetShaderInfoLog(fragment, 512, NULL, info_log);
-        std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << info_log << std::endl;
+        LOG_ERROR("Shader: Fragment Shader Compilation Failed.");
+        // std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << info_log << std::endl;
     }
 
     id = glCreateProgram();
@@ -75,7 +79,8 @@ Shader::Shader(const char* vertex_path, const char* fragment_path)
     glGetProgramiv(id, GL_LINK_STATUS, &success);
     if (!success) {
         glGetProgramInfoLog(id, 512, NULL, info_log);
-        std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << info_log << std::endl;
+        LOG_ERROR("Shader: Program Linkinkg Failed.");
+        // std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << info_log << std::endl;
     }
 
     glDeleteShader(vertex);

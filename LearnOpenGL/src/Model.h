@@ -19,7 +19,6 @@ public:
     std::vector<Mesh> meshes;
     std::string directory;
 
-
     Model(const char* path) { LoadModel(path); }
 
     void Draw(Shader& shader);

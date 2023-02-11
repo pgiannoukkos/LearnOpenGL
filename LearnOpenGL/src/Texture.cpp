@@ -1,5 +1,7 @@
 #include "Texture.h"
 
+#include "Log.h"
+
 #include <iostream>
 #include <stb_image.h>
 
@@ -22,7 +24,7 @@ Texture::Texture(const std::string &path, const std::string& type)
     stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded textures on the y-axis
     m_LocalBuffer = stbi_load(path.c_str(), &m_Width, &m_Height, &m_BBP, 0);
     if (!m_LocalBuffer)
-        std::cout << "Failed to load texture!" << std::endl;
+        LOG_ERROR("Texture: Failed to load {0}", path.c_str());
 
     if (m_BBP == 1)
         m_Format = GL_RED;
