@@ -18,9 +18,10 @@ add_subdirectory(vendor/glfw)
 add_subdirectory(vendor/glad)
 
 # Assimp
-# set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF)
+set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF)
+set(ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT OFF)
 set(ASSIMP_BUILD_TESTS OFF)
-# set(ASSIMP_BUILD_OBJ_IMPORTER ON)
+set(ASSIMP_BUILD_OBJ_IMPORTER ON)
 set(ASSIMP_BUILD_ZLIB ON)
 add_subdirectory(vendor/assimp)
 
