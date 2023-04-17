@@ -35,3 +35,5 @@
 build/
 .cache/
 
+imgui.ini
+LearnOpenGL/assets/models/backpack/source_attribution.txt
