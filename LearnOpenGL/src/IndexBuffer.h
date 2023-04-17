@@ -5,7 +5,7 @@ class IndexBuffer
 {
 public:
     IndexBuffer() : id(0) {}
-    IndexBuffer(const void* data, size_t size, GLenum mode);
+    IndexBuffer(const void* data, unsigned int size, GLenum mode);
     ~IndexBuffer() {}
 
     void Bind();
