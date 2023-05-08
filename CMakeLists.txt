@@ -1,9 +1,28 @@
-cmake_minimum_required(VERSION 3.10)
-project(LearnOpenGL)
+cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+if(UNIX)
+    # Linux-specific configuration
+    message(STATUS "Linux Config")
+    set(CMAKE_C_COMPILER "/usr/bin/clang")
+    set(CMAKE_CXX_COMPILER "/usr/bin/clang++")
+elseif(WIN32)
+    message(STATUS "Windows Config")
+    set(CMAKE_C_COMPILER "clang")
+    set(CMAKE_CXX_COMPILER "clang++")
+else()
+    message(FATAL_ERROR "Unsupported operating system: ${CMAKE_SYSTEM_NAME}")
+endif()
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
+
+project(LearnOpenGL LANGUAGES C CXX)
+
+if (NOT DEFINED CMAKE_CXX_STANDARD)
+    set(CMAKE_CXX_STANDARD 17)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+endif()
 
 set(OpenGL_GL_PREFERENCE GLVND)
 find_package(OpenGL REQUIRED)
@@ -12,15 +31,18 @@ find_package(OpenGL REQUIRED)
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-add_subdirectory(vendor/glfw)
+add_subdirectory(${CMAKE_SOURCE_DIR}/vendor/glfw)
 
 # Glad
 add_subdirectory(vendor/glad)
 
 # Assimp
+set(ASSIMP_INSTALL OFF)
+set(BUILD_SHARED_LIBS OFF)
+set(ASSIMP_BUILD_TESTS OFF)
 set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF)
 set(ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT OFF)
-set(ASSIMP_BUILD_TESTS OFF)
+set(ASSIMP_NO_EXPORT ON)
 set(ASSIMP_BUILD_OBJ_IMPORTER ON)
 set(ASSIMP_BUILD_ZLIB ON)
 add_subdirectory(vendor/assimp)
@@ -44,7 +66,7 @@ file(GLOB SOURCES LearnOpenGL/src/*.cpp vendor/imgui/backends/imgui_impl_glfw.cp
 add_executable(${PROJECT_NAME} ${SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE vendor/glfw/include vendor/glad/include vendor/assimp/include vendor/spdlog/include vendor/glm vendor/imgui vendor/stb_image)
 target_link_libraries(${PROJECT_NAME} glfw glad assimp spdlog stb_image imgui)
-target_compile_definitions(${PROJECT_NAME} PRIVATE "GL_DEBUG" "GLFW_INCLUDE_NONE")
+target_compile_definitions(${PROJECT_NAME} PRIVATE "GL_DEBUG" "GLFW_INCLUDE_NONE" "_CRT_SECURE_NO_WARNINGS")
 
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${PROJECT_NAME})
 set_property(TARGET ${PROJECT_NAME} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
