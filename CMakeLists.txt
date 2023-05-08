@@ -34,7 +34,10 @@ set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 add_subdirectory(${CMAKE_SOURCE_DIR}/vendor/glfw)
 
 # Glad
-add_subdirectory(vendor/glad)
+set(GLAD_DIR ${CMAKE_SOURCE_DIR}/vendor/glad)
+file(GLOB GLAD_SRC ${GLAD_DIR}/src/*.c)
+add_library(glad STATIC ${GLAD_SRC})
+target_include_directories(glad PRIVATE ${GLAD_DIR}/include)
 
 # Assimp
 set(ASSIMP_INSTALL OFF)
