@@ -6,6 +6,7 @@ if(UNIX)
     set(CMAKE_C_COMPILER "/usr/bin/clang")
     set(CMAKE_CXX_COMPILER "/usr/bin/clang++")
 elseif(WIN32)
+    # Windows-specific configuration
     message(STATUS "Windows Config")
     set(CMAKE_C_COMPILER "clang")
     set(CMAKE_CXX_COMPILER "clang++")
@@ -14,7 +15,6 @@ else()
 endif()
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 
 project(LearnOpenGL LANGUAGES C CXX)
@@ -31,6 +31,7 @@ find_package(OpenGL REQUIRED)
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(GLFW_INSTALL OFF)
 add_subdirectory(${CMAKE_SOURCE_DIR}/vendor/glfw)
 
 # Glad
@@ -40,36 +41,35 @@ add_library(glad STATIC ${GLAD_SRC})
 target_include_directories(glad PRIVATE ${GLAD_DIR}/include)
 
 # Assimp
-set(ASSIMP_INSTALL OFF)
 set(BUILD_SHARED_LIBS OFF)
+set(ASSIMP_NO_EXPORT ON)
 set(ASSIMP_BUILD_TESTS OFF)
+set(ASSIMP_INSTALL OFF)
 set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF)
 set(ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT OFF)
-set(ASSIMP_NO_EXPORT ON)
 set(ASSIMP_BUILD_OBJ_IMPORTER ON)
-set(ASSIMP_BUILD_ZLIB ON)
-add_subdirectory(vendor/assimp)
+add_subdirectory(${CMAKE_SOURCE_DIR}/vendor/assimp)
 
 # spdlog
-add_subdirectory(vendor/spdlog)
+add_subdirectory(${CMAKE_SOURCE_DIR}/vendor/spdlog)
 
 # stb_image
-set(STB_DIR vendor/stb_image)
+set(STB_DIR ${CMAKE_SOURCE_DIR}/vendor/stb_image)
 file(GLOB STB_SRC ${STB_DIR}/*.cpp)
 add_library(stb_image ${STB_SRC})
 
 # ImGui
-set(IMGUI_DIR vendor/imgui)
+set(IMGUI_DIR ${CMAKE_SOURCE_DIR}/vendor/imgui)
 file(GLOB IMGUI_SRC ${IMGUI_DIR}/*.cpp)
 add_library(imgui ${IMGUI_SRC})
 target_include_directories(imgui PRIVATE ${IMGUI_DIR})
 
 # Main executable
-file(GLOB SOURCES LearnOpenGL/src/*.cpp vendor/imgui/backends/imgui_impl_glfw.cpp vendor/imgui/backends/imgui_impl_opengl3.cpp)
+file(GLOB_RECURSE SOURCES LearnOpenGL/src/*.cpp vendor/imgui/backends/imgui_impl_glfw.cpp vendor/imgui/backends/imgui_impl_opengl3.cpp)
 add_executable(${PROJECT_NAME} ${SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE vendor/glfw/include vendor/glad/include vendor/assimp/include vendor/spdlog/include vendor/glm vendor/imgui vendor/stb_image)
 target_link_libraries(${PROJECT_NAME} glfw glad assimp spdlog stb_image imgui)
-target_compile_definitions(${PROJECT_NAME} PRIVATE "GL_DEBUG" "GLFW_INCLUDE_NONE" "_CRT_SECURE_NO_WARNINGS")
+target_compile_definitions(${PROJECT_NAME} PRIVATE "GLFW_INCLUDE_NONE" "_CRT_SECURE_NO_WARNINGS")
 
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${PROJECT_NAME})
 set_property(TARGET ${PROJECT_NAME} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
