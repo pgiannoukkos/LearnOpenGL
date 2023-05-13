@@ -19,6 +19,11 @@ set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 
 project(LearnOpenGL LANGUAGES C CXX)
 
+if (NOT DEFINED CMAKE_C_STANDARD)
+    set(CMAKE_C_STANDARD 17)
+    set(CMAKE_C_STANDARD_REQUIRED ON)
+endif()
+
 if (NOT DEFINED CMAKE_CXX_STANDARD)
     set(CMAKE_CXX_STANDARD 17)
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -69,7 +74,7 @@ file(GLOB_RECURSE SOURCES LearnOpenGL/src/*.cpp vendor/imgui/backends/imgui_impl
 add_executable(${PROJECT_NAME} ${SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE vendor/glfw/include vendor/glad/include vendor/assimp/include vendor/spdlog/include vendor/glm vendor/imgui vendor/stb_image)
 target_link_libraries(${PROJECT_NAME} glfw glad assimp spdlog stb_image imgui)
-target_compile_definitions(${PROJECT_NAME} PRIVATE "GLFW_INCLUDE_NONE" "_CRT_SECURE_NO_WARNINGS")
+target_compile_definitions(${PROJECT_NAME} PRIVATE "GL_DEBUG" "GLFW_INCLUDE_NONE" "_CRT_SECURE_NO_WARNINGS")
 
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${PROJECT_NAME})
 set_property(TARGET ${PROJECT_NAME} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
