@@ -46,5 +46,5 @@ def clean(context):
     if os.path.exists("build"):
         context.run("rm -rf build")
 
-    if os.path.exists("compile_commands.json"):
+    if os.path.islink("compile_commands.json"):
         os.remove("compile_commands.json")
