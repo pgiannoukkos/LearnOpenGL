@@ -8,21 +8,33 @@ def config(context, build_type="Release"):
     build_dir = "build"
     os.makedirs(build_dir, exist_ok=True)
 
-    cmd = [
-        "cmake",
-        f"-DCMAKE_BUILD_TYPE={build_type}",
-        "-S",
-        ".",
-        "-B",
-        build_dir
-    ]
+    if os.name == "nt":
+        cmd = [
+            "cmake",
+            "-G \"MinGW Makefiles\"",
+            f"-DCMAKE_BUILD_TYPE={build_type}",
+            "-S",
+            ".",
+            "-B",
+            build_dir
+        ]
+    else:
+        cmd = [
+            "cmake",
+            f"-DCMAKE_BUILD_TYPE={build_type}",
+            "-S",
+            ".",
+            "-B",
+            build_dir
+        ]
 
     print(" ".join(cmd))
-    context.run(" ".join(cmd), pty=True)
+    context.run(" ".join(cmd))
 
-    if not os.path.exists("compile_commands.json"):
-        os.symlink(f"{build_dir}/compile_commands.json",
-                   "compile_commands.json")
+    if os.path.islink("compile_commands.json"):
+        os.remove("compile_commands.json")
+
+    os.symlink(f"{build_dir}/compile_commands.json", "compile_commands.json")
 
 
 @task
@@ -38,13 +50,16 @@ def build(context):
     ]
 
     print(" ".join(cmd))
-    context.run(" ".join(cmd), pty=True)
+    context.run(" ".join(cmd))
 
 
 @task
 def clean(context):
     if os.path.exists("build"):
-        context.run("rm -rf build")
+        if os.name == "nt":
+            context.run("rmdir /S /Q build")
+        else:
+            context.run("rm -rf build")
 
     if os.path.islink("compile_commands.json"):
         os.remove("compile_commands.json")
