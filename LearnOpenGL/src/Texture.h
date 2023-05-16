@@ -7,17 +7,28 @@
 class Texture
 {
 public:
-    Texture() {}
+    Texture()
+    {
+    }
     Texture(const std::string& path, const std::string& type);
     ~Texture();
 
     void Bind(unsigned int slot = 0) const;
     void Unbind();
 
-    inline int GetWidth() const { return m_Width; }
-    inline int GetHeight() const { return m_Height; }
+    inline int GetWidth() const
+    {
+        return m_Width;
+    }
+    inline int GetHeight() const
+    {
+        return m_Height;
+    }
 
-    inline std::string GetType() const { return m_Type; }
+    inline std::string GetType() const
+    {
+        return m_Type;
+    }
 
 private:
     unsigned int m_TextureID;

@@ -6,7 +6,9 @@ class VertextArray
 {
 public:
     VertextArray();
-    ~VertextArray() {}
+    ~VertextArray()
+    {
+    }
 
     void Bind();
     void Unbind();

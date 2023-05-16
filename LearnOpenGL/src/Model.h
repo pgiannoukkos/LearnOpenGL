@@ -1,8 +1,8 @@
 #pragma once
 
 #include <assimp/Importer.hpp>
-#include <assimp/scene.h>
 #include <assimp/postprocess.h>
+#include <assimp/scene.h>
 
 #include <glm/glm.hpp>
 #include <stb_image.h>
@@ -19,7 +19,10 @@ public:
     std::vector<Mesh> meshes;
     std::string directory;
 
-    Model(const char* path) { LoadModel(path); }
+    Model(const char* path)
+    {
+        LoadModel(path);
+    }
 
     void Draw(Shader& shader);
 

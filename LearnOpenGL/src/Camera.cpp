@@ -1,6 +1,5 @@
 #include "Camera.h"
 
-
 Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch)
     : m_Front(glm::vec3(0.0f, 0.0f, -1.0f)), m_MovementSpeed(SPEED), m_MouseSensitivity(SENSITIVITY), m_Zoom(ZOOM)
 {
@@ -52,7 +51,8 @@ void Camera::ProcessMouseMovement(float xoffset, float yoffset, bool constrain_p
     m_Pitch += yoffset;
 
     // make sure that when pitch is out of bounds, screen doesn't get flipped
-    if (constrain_pitch) {
+    if (constrain_pitch)
+    {
         if (m_Pitch > 89.0f)
             m_Pitch = 89.0f;
         if (m_Pitch < -89.0f)

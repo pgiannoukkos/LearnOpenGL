@@ -8,10 +8,10 @@
 #include <string>
 #include <vector>
 
+#include "IndexBuffer.h"
 #include "Shader.h"
 #include "VertexArray.h"
 #include "VertexBuffer.h"
-#include "IndexBuffer.h"
 
 struct Vertex
 {
@@ -42,7 +42,7 @@ private:
     // render data
     VertextArray vao;
     VertexBuffer vbo;
-    IndexBuffer  ebo;
+    IndexBuffer ebo;
 
     void SetupMesh();
 };

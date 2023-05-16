@@ -5,9 +5,15 @@
 class VertexBuffer
 {
 public:
-    VertexBuffer() : id(0) {}
+    VertexBuffer() : id(0)
+    {
+    }
+
     VertexBuffer(const void* data, unsigned int size, GLenum mode);
-    ~VertexBuffer() {}
+
+    ~VertexBuffer()
+    {
+    }
 
     void Bind();
     void Unbind();
@@ -16,4 +22,3 @@ public:
 private:
     unsigned int id;
 };
-

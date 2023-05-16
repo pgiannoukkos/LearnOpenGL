@@ -4,9 +4,15 @@
 class IndexBuffer
 {
 public:
-    IndexBuffer() : id(0) {}
+    IndexBuffer() : id(0)
+    {
+    }
+
     IndexBuffer(const void* data, unsigned int size, GLenum mode);
-    ~IndexBuffer() {}
+
+    ~IndexBuffer()
+    {
+    }
 
     void Bind();
     void Unbind();
@@ -15,4 +21,3 @@ public:
 private:
     unsigned int id;
 };
-
