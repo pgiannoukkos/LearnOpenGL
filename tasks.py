@@ -3,9 +3,9 @@ from invoke import task
 
 
 @task
-def config(context, build_type="Release"):
+def config(context, build_type="Debug"):
     print(f"Configuring project with CMake (build_type: {build_type})...")
-    build_dir = "build"
+    build_dir = f"build/{build_type}"
     os.makedirs(build_dir, exist_ok=True)
 
     if os.name == "nt":
@@ -38,9 +38,9 @@ def config(context, build_type="Release"):
 
 
 @task
-def build(context):
+def build(context, build_type="Debug"):
     print("Building project with CMake...")
-    build_dir = "build"
+    build_dir = f"build/{build_type}"
 
     cmd = [
         "cmake",
