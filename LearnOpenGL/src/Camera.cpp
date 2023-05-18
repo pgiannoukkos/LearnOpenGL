@@ -1,6 +1,6 @@
 #include "Camera.h"
 
-Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch)
+Camera::Camera(glm::vec3 position, glm::vec3 up, f32 yaw, f32 pitch)
     : m_Front(glm::vec3(0.0f, 0.0f, -1.0f)), m_MovementSpeed(SPEED), m_MouseSensitivity(SENSITIVITY), m_Zoom(ZOOM)
 {
     m_Position = position;
@@ -10,7 +10,7 @@ Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch)
     UpdateCameraVectors();
 }
 
-Camera::Camera(float pos_x, float pos_y, float pos_z, float up_x, float up_y, float up_z, float yaw, float pitch)
+Camera::Camera(f32 pos_x, f32 pos_y, f32 pos_z, f32 up_x, f32 up_y, f32 up_z, f32 yaw, f32 pitch)
     : m_Front(glm::vec3(0.0f, 0.0f, -1.0f)), m_MovementSpeed(SPEED), m_MouseSensitivity(SENSITIVITY), m_Zoom(ZOOM)
 {
     m_Position = glm::vec3(pos_x, pos_y, pos_z);
@@ -25,9 +25,9 @@ glm::mat4 Camera::GetViewMatrix()
     return glm::lookAt(m_Position, m_Position + m_Front, m_Up);
 }
 
-void Camera::ProcessKeyboard(CameraMovement direction, float delta_time)
+void Camera::ProcessKeyboard(CameraMovement direction, f32 delta_time)
 {
-    float velocity = m_MovementSpeed * delta_time;
+    f32 velocity = m_MovementSpeed * delta_time;
     if (direction == FORWARD)
         m_Position += m_Front * velocity;
     if (direction == BACKWARD)
@@ -42,7 +42,7 @@ void Camera::ProcessKeyboard(CameraMovement direction, float delta_time)
         m_Position -= m_Up * velocity;
 }
 
-void Camera::ProcessMouseMovement(float xoffset, float yoffset, bool constrain_pitch)
+void Camera::ProcessMouseMovement(f32 xoffset, f32 yoffset, bool constrain_pitch)
 {
     xoffset *= m_MouseSensitivity;
     yoffset *= m_MouseSensitivity;
@@ -63,7 +63,7 @@ void Camera::ProcessMouseMovement(float xoffset, float yoffset, bool constrain_p
     UpdateCameraVectors();
 }
 
-void Camera::ProcessMouseScroll(float yoffset)
+void Camera::ProcessMouseScroll(f32 yoffset)
 {
     m_Zoom -= yoffset;
     if (m_Zoom < 1.0f)

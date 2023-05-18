@@ -20,7 +20,7 @@ void VertextArray::Destroy()
     glDeleteVertexArrays(1, &id);
 }
 
-void VertextArray::LinkAttrib(unsigned int layout, unsigned int nComponents, GLenum type, GLsizei stride, void* offset)
+void VertextArray::LinkAttrib(u32 layout, u32 nComponents, u32 type, i32 stride, void* offset)
 {
     glBindVertexArray(id);
     glEnableVertexAttribArray(layout);

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "defines.h"
+
 #include <glad/glad.h>
 
 #include <glm/glm.hpp>
@@ -22,7 +24,7 @@ struct Vertex
 
 struct Texture2D
 {
-    unsigned int id;
+    u32 id;
     std::string type;
     std::string path;
 };
@@ -31,10 +33,10 @@ class Mesh
 {
 public:
     std::vector<Vertex> vertices;
-    std::vector<unsigned int> indices;
+    std::vector<u32> indices;
     std::vector<Texture2D> textures;
 
-    Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture2D> textures);
+    Mesh(std::vector<Vertex> vertices, std::vector<u32> indices, std::vector<Texture2D> textures);
 
     void Draw(Shader& shader);
 

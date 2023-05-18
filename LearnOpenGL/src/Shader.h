@@ -1,5 +1,7 @@
 #pragma once
 
+#include "defines.h"
+
 #include <glad/glad.h>
 
 #include <fstream>
@@ -13,7 +15,7 @@
 class Shader
 {
 public:
-    unsigned int id;
+    u32 id;
 
     // constructor reads and builds the shader
     Shader(const char* vertex_path, const char* fragment_path);

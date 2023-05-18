@@ -1,5 +1,8 @@
 #pragma once
-#include "glad/glad.h"
+
+#include "defines.h"
+
+#include <glad/glad.h>
 
 class IndexBuffer
 {
@@ -8,7 +11,7 @@ public:
     {
     }
 
-    IndexBuffer(const void* data, unsigned int size, GLenum mode);
+    IndexBuffer(const void* data, u32 size, u32 mode);
 
     ~IndexBuffer()
     {

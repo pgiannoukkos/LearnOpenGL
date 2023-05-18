@@ -1,13 +1,12 @@
 #include "Model.h"
 
 #include "Log.h"
-#include "defines.h"
 
 void Model::Draw(Shader& shader)
 {
-    for (unsigned int i = 0; i < meshes.size(); i++)
+    for (auto& mesh : meshes)
     {
-        meshes[i].Draw(shader);
+        mesh.Draw(shader);
     }
 }
 
@@ -31,14 +30,14 @@ void Model::LoadModel(std::string path)
 void Model::ProcessNode(aiNode* node, const aiScene* scene)
 {
     // process all the node's mashes (if any)
-    for (unsigned int i = 0; i < node->mNumMeshes; i++)
+    for (u32 i = 0; i < node->mNumMeshes; i++)
     {
         aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
         meshes.push_back(ProcessMesh(mesh, scene));
     }
 
     // then do the same for each of its children
-    for (unsigned int i = 0; i < node->mNumChildren; i++)
+    for (u32 i = 0; i < node->mNumChildren; i++)
     {
         ProcessNode(node->mChildren[i], scene);
     }
@@ -47,10 +46,10 @@ void Model::ProcessNode(aiNode* node, const aiScene* scene)
 Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 {
     std::vector<Vertex> vertices;
-    std::vector<unsigned int> indices;
+    std::vector<u32> indices;
     std::vector<Texture2D> textures;
 
-    for (unsigned int i = 0; i < mesh->mNumVertices; i++)
+    for (u32 i = 0; i < mesh->mNumVertices; i++)
     {
         Vertex vertex;
 
@@ -82,10 +81,10 @@ Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
     }
 
     // process indices
-    for (unsigned int i = 0; i < mesh->mNumFaces; i++)
+    for (u32 i = 0; i < mesh->mNumFaces; i++)
     {
         aiFace face = mesh->mFaces[i];
-        for (unsigned int j = 0; j < face.mNumIndices; j++)
+        for (u32 j = 0; j < face.mNumIndices; j++)
         {
             indices.push_back(face.mIndices[j]);
         }
@@ -111,12 +110,12 @@ std::vector<Texture2D> Model::LoadMaterialTextures(aiMaterial* mat, aiTextureTyp
 {
     std::vector<Texture2D> textures;
 
-    for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
+    for (u32 i = 0; i < mat->GetTextureCount(type); i++)
     {
         aiString str;
         mat->GetTexture(type, i, &str);
         bool skip = false;
-        for (unsigned int j = 0; j < textures_loaded.size(); j++)
+        for (u32 j = 0; j < textures_loaded.size(); j++)
         {
             if (std::strcmp(textures_loaded[j].path.data(), str.C_Str()) == 0)
             {
@@ -138,21 +137,21 @@ std::vector<Texture2D> Model::LoadMaterialTextures(aiMaterial* mat, aiTextureTyp
     return textures;
 }
 
-unsigned int Model::TextureFromFile(const char* path, const std::string& directory)
+u32 Model::TextureFromFile(const char* path, const std::string& directory)
 {
     std::string filename = std::string(path);
     filename = directory + '/' + filename;
     LOG_TRACE("Texture: {0}", filename);
 
-    unsigned int texture_id;
+    u32 texture_id;
     glGenTextures(1, &texture_id);
 
-    stbi_set_flip_vertically_on_load(true);
-    int width, height, nrComponents;
-    unsigned char* data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
+    stbi_set_flip_vertically_on_load(false);
+    i32 width, height, nrComponents;
+    u8* data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
     if (data)
     {
-        GLenum format;
+        u32 format;
         if (nrComponents == 1)
             format = GL_RED;
         else if (nrComponents == 3)

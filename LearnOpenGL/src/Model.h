@@ -1,13 +1,14 @@
 #pragma once
 
+#include "defines.h"
+#include "Mesh.h"
+
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 
 #include <glm/glm.hpp>
 #include <stb_image.h>
-
-#include "Mesh.h"
 
 #include <string>
 #include <vector>

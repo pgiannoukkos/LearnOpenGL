@@ -1,6 +1,6 @@
 #include "Mesh.h"
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture2D> textures)
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<u32> indices, std::vector<Texture2D> textures)
 {
     this->vertices = vertices;
     this->indices = indices;
@@ -11,10 +11,10 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std:
 
 void Mesh::Draw(Shader& shader)
 {
-    unsigned int diffuseNr = 1;
-    unsigned int specularNr = 1;
+    u32 diffuseNr = 1;
+    u32 specularNr = 1;
 
-    for (unsigned int i = 0; i < textures.size(); i++)
+    for (u32 i = 0; i < textures.size(); i++)
     {
         glActiveTexture(GL_TEXTURE0 + i);
         std::string number;
@@ -42,9 +42,9 @@ void Mesh::Draw(Shader& shader)
 void Mesh::SetupMesh()
 {
     vao.Bind();
-    vbo = VertexBuffer(&vertices[0], vertices.size() * sizeof(Vertex), GL_STATIC_DRAW);
+    vbo = VertexBuffer(vertices.data(), vertices.size() * sizeof(Vertex), GL_STATIC_DRAW);
     vbo.Bind();
-    ebo = IndexBuffer(&indices[0], indices.size() * sizeof(unsigned int), GL_STATIC_DRAW);
+    ebo = IndexBuffer(indices.data(), indices.size() * sizeof(u32), GL_STATIC_DRAW);
     ebo.Bind();
 
     // vertex positions

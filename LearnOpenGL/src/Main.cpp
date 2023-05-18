@@ -61,8 +61,7 @@ int main()
 
     // glfw: initialize and configure
     // ------------------------------
-    if (!glfwInit())
-    {
+    if (!glfwInit()) {
         LOG_FATAL("Failed to initialize GLFW.");
         return -1;
     }
@@ -76,8 +75,7 @@ int main()
     // glfw window creation
     LOG_INFO("Creating GLFW window {0}x{1}", SCR_WIDTH, SCR_HEIGHT);
     GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
-    if (!window)
-    {
+    if (!window) {
         LOG_FATAL("Failed to create GLFW window");
         glfwTerminate();
         return -1;
@@ -94,8 +92,7 @@ int main()
 
     // glad: load all OpenGL function pointers
     // ---------------------------------------
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-    {
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         LOG_FATAL("Failed to initialize GLAD");
         glfwTerminate();
         return -1;
@@ -124,9 +121,10 @@ int main()
                   "LearnOpenGL/assets/shaders/model_loading_fs.glsl");
 
     // load models
-    Model our_model("LearnOpenGL/assets/models/obj/backpack/backpack.obj");
-    // Model workshop("LearnOpenGL/assets/models/obj/workshop/Kurala_Workshop_SF.obj");
-    // Model cyborg("LearnOpenGL/assets/models/obj/cyborg/cyborg.obj");
+    // Model our_model("LearnOpenGL/assets/models/obj/backpack/backpack.obj");
+    // Model our_model("LearnOpenGL/assets/models/obj/rifle/MA5D_Assault_Rifle_v008.obj");
+    Model our_model("LearnOpenGL/assets/models/obj/workshop/workshop.obj");
+    // Model our_model("LearnOpenGL/assets/models/obj/cyborg/cyborg.obj");
     // GLTFModel castle("LearnOpenGL/assets/models/gltf/sponza_atrium/Sponza.gltf");
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
@@ -212,8 +210,7 @@ int main()
 
     // render loop
     // -----------
-    while (!glfwWindowShouldClose(window))
-    {
+    while (!glfwWindowShouldClose(window)) {
         // per-frame time logic
         float current_time = static_cast<float>(glfwGetTime());
         delta_time = current_time - last_time;
@@ -301,10 +298,9 @@ int main()
         model =
             glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the cornen of the screen
         model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f)); // it's a bit too big for our scene, so scale it down
+        // model = glm::rotate(model, glm::radians(180.0f), glm::vec3(1.0f, 0.0f, 0.0));
         shader.SetMat4("model", model);
-        // our_model.Draw(shader);
         our_model.Draw(shader);
-        // castle.Render();
 
         // // bind diffuse map
         // diffuse_map.Bind(0);
@@ -326,8 +322,7 @@ int main()
         light_cube_shader.SetMat4("projection", projection);
         light_cube_shader.SetMat4("view", view);
         light_vao.Bind();
-        for (unsigned int i = 0; i < 4; i++)
-        {
+        for (unsigned int i = 0; i < 4; i++) {
             model = glm::mat4(1.0f);
             model = glm::translate(model, pointLightPositions[i]);
             model = glm::scale(model, glm::vec3(0.2f));
@@ -371,8 +366,7 @@ int main()
         }
 
         // 3. Show another simple window.
-        if (show_another_window)
-        {
+        if (show_another_window) {
             ImGui::Begin("Another Window",
                          &show_another_window); // Pass a pointer to our bool variable (the window will have a closing
                                                 // button that will clear the bool when clicked)
@@ -393,8 +387,7 @@ int main()
         // (Platform functions may change the current OpenGL context, so we save/restore it to make it easier to paste
         // this code elsewhere.
         //  For this specific demo app we could also call glfwMakeContextCurrent(window) directly)
-        if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-        {
+        if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
             GLFWwindow* backup_current_context = glfwGetCurrentContext();
             ImGui::UpdatePlatformWindows();
             ImGui::RenderPlatformWindowsDefault();
@@ -459,14 +452,12 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int heigth)
 
 void mouse_callback(GLFWwindow* window, double xpos_in, double ypos_in)
 {
-    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
-    {
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         float xpos = static_cast<float>(xpos_in);
         float ypos = static_cast<float>(ypos_in);
 
-        if (first_mouse)
-        {
+        if (first_mouse) {
             last_x = xpos;
             last_y = ypos;
             first_mouse = false;
@@ -480,8 +471,7 @@ void mouse_callback(GLFWwindow* window, double xpos_in, double ypos_in)
 
         camera.ProcessMouseMovement(xoffset, yoffset);
     }
-    else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE)
-    {
+    else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE) {
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         first_mouse = true;
     }
@@ -513,8 +503,7 @@ void InitImGui(GLFWwindow* window)
     // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular
     // ones.
     ImGuiStyle& style = ImGui::GetStyle();
-    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-    {
+    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
         style.WindowRounding = 0.0f;
         style.Colors[ImGuiCol_WindowBg].w = 1.0f;
     }
@@ -530,12 +519,10 @@ void PrintGLFWInfo(GLFWwindow* window)
     std::string version = glfwGetVersionString();
     std::string opengl_profile = "";
 
-    if (p == GLFW_OPENGL_COMPAT_PROFILE)
-    {
+    if (p == GLFW_OPENGL_COMPAT_PROFILE) {
         opengl_profile = "OpenGL Compatibility Profile";
     }
-    else if (p == GLFW_OPENGL_CORE_PROFILE)
-    {
+    else if (p == GLFW_OPENGL_CORE_PROFILE) {
         opengl_profile = "OpenGL Core Profile";
     }
 

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "defines.h"
+
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -19,11 +21,11 @@ enum CameraMovement
 };
 
 // Default camera values
-const float YAW = -90.0f;
-const float PITCH = 0.0;
-const float SPEED = 5.0f;
-const float SENSITIVITY = 0.1f;
-const float ZOOM = 45.0f;
+const f32 YAW = -90.0f;
+const f32 PITCH = 0.0;
+const f32 SPEED = 5.0f;
+const f32 SENSITIVITY = 0.1f;
+const f32 ZOOM = 45.0f;
 
 class Camera
 {
@@ -36,19 +38,19 @@ public:
     glm::vec3 m_WorldUp;
 
     // euler angles
-    float m_Yaw;
-    float m_Pitch;
+    f32 m_Yaw;
+    f32 m_Pitch;
 
     // camera options
-    float m_MovementSpeed;
-    float m_MouseSensitivity;
-    float m_Zoom;
+    f32 m_MovementSpeed;
+    f32 m_MouseSensitivity;
+    f32 m_Zoom;
 
     // constructor with vectors
     Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f),
-           float yaw = YAW, float pitch = PITCH);
+           f32 yaw = YAW, f32 pitch = PITCH);
     // constructor with scalar values
-    Camera(float pos_x, float pos_y, float pos_z, float up_x, float up_y, float up_z, float yaw, float pitch);
+    Camera(f32 pos_x, f32 pos_y, f32 pos_z, f32 up_x, f32 up_y, f32 up_z, f32 yaw, f32 pitch);
 
     /**
      * @brief Get the View Matrix
@@ -57,9 +59,9 @@ public:
      */
     glm::mat4 GetViewMatrix();
 
-    void ProcessKeyboard(CameraMovement direction, float delta_time);
-    void ProcessMouseMovement(float xoffset, float yoffset, bool constrain_pitch = true);
-    void ProcessMouseScroll(float yoffset);
+    void ProcessKeyboard(CameraMovement direction, f32 delta_time);
+    void ProcessMouseMovement(f32 xoffset, f32 yoffset, bool constrain_pitch = true);
+    void ProcessMouseScroll(f32 yoffset);
 
 private:
     void UpdateCameraVectors();

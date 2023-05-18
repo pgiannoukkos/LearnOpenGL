@@ -1,5 +1,7 @@
 #pragma once
 
+#include "defines.h"
+
 #include <glad/glad.h>
 
 #include <string>
@@ -13,14 +15,14 @@ public:
     Texture(const std::string& path, const std::string& type);
     ~Texture();
 
-    void Bind(unsigned int slot = 0) const;
+    void Bind(u32 slot = 0) const;
     void Unbind();
 
-    inline int GetWidth() const
+    inline i32 GetWidth() const
     {
         return m_Width;
     }
-    inline int GetHeight() const
+    inline i32 GetHeight() const
     {
         return m_Height;
     }
@@ -31,10 +33,10 @@ public:
     }
 
 private:
-    unsigned int m_TextureID;
-    unsigned char* m_LocalBuffer;
+    u32 m_TextureID;
+    u8* m_LocalBuffer;
     std::string m_FilePath;
     std::string m_Type;
-    int m_Width, m_Height, m_BBP;
+    i32 m_Width, m_Height, m_BBP;
     GLenum m_Format;
 };

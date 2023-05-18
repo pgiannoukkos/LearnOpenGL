@@ -1,5 +1,7 @@
 #pragma once
 
+#include "defines.h"
+
 #include <glad/glad.h>
 
 class VertextArray
@@ -14,8 +16,8 @@ public:
     void Unbind();
     void Destroy();
 
-    void LinkAttrib(unsigned int layout, unsigned int nComponents, GLenum type, GLsizei stride, void* offset);
+    void LinkAttrib(u32 layout, u32 nComponents, u32 type, i32 stride, void* offset);
 
 private:
-    unsigned int id;
+    u32 id;
 };

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "defines.h"
+
 #include "glad/glad.h"
 
 class VertexBuffer
@@ -9,7 +11,7 @@ public:
     {
     }
 
-    VertexBuffer(const void* data, unsigned int size, GLenum mode);
+    VertexBuffer(const void* data, u32 size, u32 mode);
 
     ~VertexBuffer()
     {
@@ -20,5 +22,5 @@ public:
     void Destroy();
 
 private:
-    unsigned int id;
+    u32 id;
 };
