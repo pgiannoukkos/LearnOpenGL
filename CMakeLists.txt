@@ -73,7 +73,7 @@ target_include_directories(imgui PRIVATE ${IMGUI_DIR})
 # Main executable
 file(GLOB_RECURSE SOURCES LearnOpenGL/src/*.cpp vendor/imgui/backends/imgui_impl_glfw.cpp vendor/imgui/backends/imgui_impl_opengl3.cpp)
 add_executable(${PROJECT_NAME} ${SOURCES})
-target_include_directories(${PROJECT_NAME} PRIVATE vendor/glfw/include vendor/glad/include vendor/assimp/include vendor/spdlog/include vendor/glm vendor/imgui vendor/stb_image)
+target_include_directories(${PROJECT_NAME} PRIVATE LearnOpenGL/src vendor/glfw/include vendor/glad/include vendor/assimp/include vendor/spdlog/include vendor/glm vendor/imgui vendor/stb_image)
 target_link_libraries(${PROJECT_NAME} glfw glad assimp spdlog stb_image imgui)
 target_compile_definitions(${PROJECT_NAME} PRIVATE "GL_DEBUG" "GLFW_INCLUDE_NONE" "_CRT_SECURE_NO_WARNINGS")
 
