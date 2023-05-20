@@ -146,7 +146,7 @@ u32 Model::TextureFromFile(const char* path, const std::string& directory)
     u32 texture_id;
     glGenTextures(1, &texture_id);
 
-    stbi_set_flip_vertically_on_load(false);
+    stbi_set_flip_vertically_on_load(true);
     i32 width, height, nrComponents;
     u8* data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
     if (data)
