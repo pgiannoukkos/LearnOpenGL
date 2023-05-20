@@ -1,4 +1,5 @@
 #include "ImGuiLayer.h"
+#include "imgui.h"
 
 #include <iostream>
 
@@ -84,14 +85,15 @@ void ImGuiLayer::OnImGuiRender(ImTextureID texture, ImVec2 image_size)
     ImGui::PopStyleVar(3);
     ImGui::End();
 
+    ImGui::Begin("Render Settings");
+    ImGui::End();
+
     ImGui::Begin("Metrics");
 
     ImGui::Text("Dear ImGui %s", ImGui::GetVersion());
     ImGui::Text("Application average\n %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
 
     ImGui::End();
-
-    ImGui::ShowMetricsWindow();
 }
 
 void ImGuiLayer::Begin()
