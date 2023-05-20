@@ -199,6 +199,43 @@ int main()
 
     float last_time = static_cast<float>(glfwGetTime());
 
+    u32 tex_width = 800;
+    u32 tex_height = 600;
+
+    u32 framebuffer;
+    glGenFramebuffers(1, &framebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+
+    u32 texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tex_width, tex_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+
+    // Configure the texture parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    // Attach the texture to the framebuffer
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
+
+    u32 rbo;
+    glGenRenderbuffers(1, &rbo);
+    glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, tex_width, tex_height);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rbo);
+
+    // Check framebuffer completeness
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        LOG_ERROR("Framebuffer incomplete");
+        return 1;
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
     // render loop
     // -----------
     while (!glfwWindowShouldClose(window)) {
@@ -211,9 +248,14 @@ int main()
         process_input(window);
 
         // render
-        // glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-        glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w,
-                     clear_color.w);
+        // ------
+        // bind to framebuffer and draw scene as we normally would to color texture
+        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+        glEnable(GL_DEPTH_TEST);                 // enable depth testing
+        glViewport(0, 0, tex_width, tex_height); // set glViewport to texture's dimensions
+
+        // clear the framebuffer's contents
+        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         shader.Use();
@@ -278,8 +320,7 @@ int main()
         shader.SetFloat("material.shininess", 64.0f);
 
         // view/projection transformations
-        glm::mat4 projection =
-            glm::perspective(glm::radians(camera.m_Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+        glm::mat4 projection = glm::perspective(glm::radians(camera.m_Zoom), ASPECT_RATIO, 0.1f, 100.0f);
         glm::mat4 view = camera.GetViewMatrix();
         shader.SetMat4("projection", projection);
         shader.SetMat4("view", view);
@@ -321,6 +362,10 @@ int main()
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
 
+        // bind back to the default framebuffer
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glDisable(GL_DEPTH_TEST);
+        glClear(GL_COLOR_BUFFER_BIT);
 
         // Start the Dear ImGui frame
         imgui_layer->Begin();
@@ -335,13 +380,18 @@ int main()
         glfwPollEvents();
     }
 
-    // optional: de-allocate all resources once they've outlived their purpose
-    // -----------------------------------------------------------------------
-    // light_vao.Destroy();
+    // optional: de-allocate all resources once they've outlived their purpose:
+    // ------------------------------------------------------------------------
+    light_vao.Destroy();
     // cube_vao.Destroy();
-    // vbo.Destroy();
+    vbo.Destroy();
     // lighting_shader.Destroy();
-    // light_cube_shader.Destroy();
+    light_cube_shader.Destroy();
+    shader.Destroy();
+
+    glDeleteRenderbuffers(1, &rbo);
+    glDeleteFramebuffers(1, &framebuffer);
+
     imgui_layer->OnDetach();
 
     // glfw: terminate, clearing all previously allocated GLFW resources.
