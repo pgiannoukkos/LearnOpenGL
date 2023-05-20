@@ -2,10 +2,14 @@
 
 #include "Log.h"
 
+Model::Model(const char* path)
+{
+    LoadModel(path);
+}
+
 void Model::Draw(Shader& shader)
 {
-    for (auto& mesh : meshes)
-    {
+    for (auto& mesh : meshes) {
         mesh.Draw(shader);
     }
 }
@@ -17,28 +21,28 @@ void Model::LoadModel(std::string path)
     u32 flags = aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals;
     const aiScene* scene = importer.ReadFile(path, flags);
 
-    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
-    {
+    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
         LOG_ERROR("Assimp: {0}", importer.GetErrorString());
         return;
     }
 
+    // retrieve the directory path of the filepath
     directory = path.substr(0, path.find_last_of('/'));
+
+    // process ASSIMP's root node recursively
     ProcessNode(scene->mRootNode, scene);
 }
 
 void Model::ProcessNode(aiNode* node, const aiScene* scene)
 {
     // process all the node's mashes (if any)
-    for (u32 i = 0; i < node->mNumMeshes; i++)
-    {
+    for (u32 i = 0; i < node->mNumMeshes; i++) {
         aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
         meshes.push_back(ProcessMesh(mesh, scene));
     }
 
     // then do the same for each of its children
-    for (u32 i = 0; i < node->mNumChildren; i++)
-    {
+    for (u32 i = 0; i < node->mNumChildren; i++) {
         ProcessNode(node->mChildren[i], scene);
     }
 }
@@ -49,31 +53,33 @@ Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
     std::vector<u32> indices;
     std::vector<Texture2D> textures;
 
-    for (u32 i = 0; i < mesh->mNumVertices; i++)
-    {
+    for (u32 i = 0; i < mesh->mNumVertices; i++) {
         Vertex vertex;
 
         // process vertex positions, normals and texture coordinates
+        // positions
         glm::vec3 vector;
         vector.x = mesh->mVertices[i].x;
         vector.y = mesh->mVertices[i].y;
         vector.z = mesh->mVertices[i].z;
         vertex.position = vector;
 
-        vector.x = mesh->mNormals[i].x;
-        vector.y = mesh->mNormals[i].y;
-        vector.z = mesh->mNormals[i].z;
-        vertex.normal = vector;
+        // normals
+        if (mesh->HasNormals()) {
+            vector.x = mesh->mNormals[i].x;
+            vector.y = mesh->mNormals[i].y;
+            vector.z = mesh->mNormals[i].z;
+            vertex.normal = vector;
+        }
 
-        if (mesh->mTextureCoords[0])
-        {
+        // texture coordinates
+        if (mesh->mTextureCoords[0]) {
             glm::vec2 vec;
             vec.x = mesh->mTextureCoords[0][i].x;
             vec.y = mesh->mTextureCoords[0][i].y;
             vertex.tex_coords = vec;
         }
-        else
-        {
+        else {
             vertex.tex_coords = glm::vec2(0.0f, 0.0f);
         }
 
@@ -81,18 +87,15 @@ Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
     }
 
     // process indices
-    for (u32 i = 0; i < mesh->mNumFaces; i++)
-    {
+    for (u32 i = 0; i < mesh->mNumFaces; i++) {
         aiFace face = mesh->mFaces[i];
-        for (u32 j = 0; j < face.mNumIndices; j++)
-        {
+        for (u32 j = 0; j < face.mNumIndices; j++) {
             indices.push_back(face.mIndices[j]);
         }
     }
 
     // process material
-    if (mesh->mMaterialIndex >= 0)
-    {
+    if (mesh->mMaterialIndex >= 0) {
         aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
         std::vector<Texture2D> diffuse_maps = LoadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
@@ -110,26 +113,24 @@ std::vector<Texture2D> Model::LoadMaterialTextures(aiMaterial* mat, aiTextureTyp
 {
     std::vector<Texture2D> textures;
 
-    for (u32 i = 0; i < mat->GetTextureCount(type); i++)
-    {
+    for (u32 i = 0; i < mat->GetTextureCount(type); i++) {
         aiString str;
         mat->GetTexture(type, i, &str);
+
+        // check if texture was loaded before and if so, continue to next iteration: skip loading a new texture
         bool skip = false;
-        for (u32 j = 0; j < textures_loaded.size(); j++)
-        {
-            if (std::strcmp(textures_loaded[j].path.data(), str.C_Str()) == 0)
-            {
+        for (u32 j = 0; j < textures_loaded.size(); j++) {
+            if (std::strcmp(textures_loaded[j].GetPath().data(), str.C_Str()) == 0) {
                 textures.push_back(textures_loaded[j]);
                 skip = true;
                 break;
             }
         }
-        if (!skip)
-        {
+        if (!skip) {
             Texture2D texture;
-            texture.id = TextureFromFile(str.C_Str(), this->directory);
-            texture.type = type_name;
-            texture.path = str.C_Str();
+            texture = TextureFromFile(str.C_Str(), this->directory);
+            texture.SetType(type_name);
+            texture.SetPath(str.C_Str());
             textures.push_back(texture);
             textures_loaded.push_back(texture);
         }
@@ -137,44 +138,43 @@ std::vector<Texture2D> Model::LoadMaterialTextures(aiMaterial* mat, aiTextureTyp
     return textures;
 }
 
-u32 Model::TextureFromFile(const char* path, const std::string& directory)
+Texture2D Model::TextureFromFile(const char* path, const std::string& directory)
 {
     std::string filename = std::string(path);
     filename = directory + '/' + filename;
     LOG_TRACE("Texture: {0}", filename);
 
-    u32 texture_id;
-    glGenTextures(1, &texture_id);
+    Texture2D texture;
 
-    stbi_set_flip_vertically_on_load(true);
+    stbi_set_flip_vertically_on_load(false);
     i32 width, height, nrComponents;
     u8* data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
-    if (data)
-    {
+    if (data) {
         u32 format;
-        if (nrComponents == 1)
+        if (nrComponents == 1) {
             format = GL_RED;
-        else if (nrComponents == 3)
+            texture.SetInternalFormat(format);
+            texture.SetImageFormat(format);
+        }
+        else if (nrComponents == 3) {
             format = GL_RGB;
-        else if (nrComponents == 4)
+            texture.SetInternalFormat(format);
+            texture.SetImageFormat(format);
+        }
+        else if (nrComponents == 4) {
             format = GL_RGBA;
+            texture.SetInternalFormat(format);
+            texture.SetImageFormat(format);
+        }
 
-        glBindTexture(GL_TEXTURE_2D, texture_id);
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        texture.Generate(width, height, data, true);
 
         stbi_image_free(data);
     }
-    else
-    {
+    else {
         LOG_ERROR("Texture: Failed to load {0}", path);
         stbi_image_free(data);
     }
 
-    return texture_id;
+    return texture;
 }

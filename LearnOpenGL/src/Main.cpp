@@ -14,12 +14,9 @@
 #include "Log.h"
 #include "Model.h"
 #include "Shader.h"
-#include "Texture.h"
+#include "Texture2D.h"
 #include "VertexArray.h"
 #include "VertexBuffer.h"
-#include "assimp/Importer.hpp"
-#include "assimp/postprocess.h"
-#include "assimp/scene.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int heigth);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -65,6 +62,7 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
 #ifdef __APPLE__
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif // __APPLE__
@@ -117,10 +115,12 @@ int main()
     Shader shader("assets/shaders/model_loading_vs.glsl", "assets/shaders/model_loading_fs.glsl");
 
     // load models
-    Model our_model("assets/models/obj/backpack/backpack.obj");
+    // Model our_model("assets/models/obj/backpack/backpack.obj");
     // Model our_model("assets/models/obj/rifle/MA5D_Assault_Rifle_v008.obj");
     // Model our_model("assets/models/obj/workshop/workshop.obj");
     // Model our_model("assets/models/obj/cyborg/cyborg.obj");
+    // Model our_model("assets/models/obj/castle/castle.obj");
+    Model our_model("assets/models/obj/sponza/sponza.obj");
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
@@ -199,26 +199,20 @@ int main()
 
     float last_time = static_cast<float>(glfwGetTime());
 
-    u32 tex_width = 800;
-    u32 tex_height = 600;
+    u32 tex_width = 1280;
+    u32 tex_height = 720;
 
     u32 framebuffer;
     glGenFramebuffers(1, &framebuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 
-    u32 texture;
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tex_width, tex_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-
-    // Configure the texture parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glBindTexture(GL_TEXTURE_2D, 0);
+    Texture2D scene;
+    scene.SetInternalFormat(GL_RGBA);
+    scene.SetImageFormat(GL_RGBA);
+    scene.Generate(tex_width, tex_height, nullptr);
 
     // Attach the texture to the framebuffer
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, scene.GetTexID(), 0);
 
     u32 rbo;
     glGenRenderbuffers(1, &rbo);
@@ -329,7 +323,8 @@ int main()
         glm::mat4 model = glm::mat4(1.0f);
         model =
             glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the cornen of the screen
-        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f)); // it's a bit too big for our scene, so scale it down
+        model =
+            glm::scale(model, glm::vec3(0.005f, 0.005f, 0.005f)); // it's a bit too big for our scene, so scale it down
         // model = glm::rotate(model, glm::radians(180.0f), glm::vec3(1.0f, 0.0f, 0.0));
         shader.SetMat4("model", model);
         our_model.Draw(shader);
@@ -370,7 +365,7 @@ int main()
         // Start the Dear ImGui frame
         imgui_layer->Begin();
 
-        imgui_layer->OnImGuiRender(reinterpret_cast<ImTextureID>(texture), ImVec2(tex_width, tex_height));
+        imgui_layer->OnImGuiRender(reinterpret_cast<ImTextureID>(scene.GetTexID()), ImVec2(tex_width, tex_height));
 
         // Rendering
         imgui_layer->End();

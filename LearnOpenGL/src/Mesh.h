@@ -12,6 +12,7 @@
 
 #include "IndexBuffer.h"
 #include "Shader.h"
+#include "Texture2D.h"
 #include "VertexArray.h"
 #include "VertexBuffer.h"
 
@@ -20,13 +21,6 @@ struct Vertex
     glm::vec3 position;
     glm::vec3 normal;
     glm::vec2 tex_coords;
-};
-
-struct Texture2D
-{
-    u32 id;
-    std::string type;
-    std::string path;
 };
 
 class Mesh

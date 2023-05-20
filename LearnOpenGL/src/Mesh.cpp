@@ -16,9 +16,9 @@ void Mesh::Draw(Shader& shader)
 
     for (u32 i = 0; i < textures.size(); i++)
     {
-        glActiveTexture(GL_TEXTURE0 + i);
+        textures[i].Bind(i);
         std::string number;
-        std::string name = textures[i].type;
+        std::string name = textures[i].GetType();
         if (name == "texture_diffuse")
         {
             number = std::to_string(diffuseNr++);
@@ -29,7 +29,7 @@ void Mesh::Draw(Shader& shader)
         }
 
         shader.SetInt(("material." + name + number).c_str(), i);
-        glBindTexture(GL_TEXTURE_2D, textures[i].id);
+        // glBindTexture(GL_TEXTURE_2D, textures[i].id);
     }
 
     vao.Bind();

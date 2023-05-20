@@ -1,6 +1,7 @@
 #pragma once
 
 #include "defines.h"
+
 #include "Mesh.h"
 
 #include <assimp/Importer.hpp>
@@ -20,10 +21,8 @@ public:
     std::vector<Mesh> meshes;
     std::string directory;
 
-    Model(const char* path)
-    {
-        LoadModel(path);
-    }
+    Model() {}
+    Model(const char* path);
 
     void Draw(Shader& shader);
 
@@ -32,5 +31,5 @@ private:
     void ProcessNode(aiNode* node, const aiScene* scene);
     Mesh ProcessMesh(aiMesh* mesh, const aiScene* scene);
     std::vector<Texture2D> LoadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string type_name);
-    unsigned int TextureFromFile(const char* path, const std::string& directory);
+    Texture2D TextureFromFile(const char* path, const std::string& directory);
 };
