@@ -113,17 +113,14 @@ int main()
     // --------------------------------
     // Shader lighting_shader("LearnOpenGL/assets/shaders/lighting_vs.glsl",
     // "LearnOpenGL/assets/shaders/lighting_fs.glsl");
-    Shader light_cube_shader("LearnOpenGL/assets/shaders/light_cube_vs.glsl",
-                             "LearnOpenGL/assets/shaders/light_cube_fs.glsl");
-    Shader shader("LearnOpenGL/assets/shaders/model_loading_vs.glsl",
-                  "LearnOpenGL/assets/shaders/model_loading_fs.glsl");
+    Shader light_cube_shader("assets/shaders/light_cube_vs.glsl", "assets/shaders/light_cube_fs.glsl");
+    Shader shader("assets/shaders/model_loading_vs.glsl", "assets/shaders/model_loading_fs.glsl");
 
     // load models
-    // Model our_model("LearnOpenGL/assets/models/obj/backpack/backpack.obj");
-    // Model our_model("LearnOpenGL/assets/models/obj/rifle/MA5D_Assault_Rifle_v008.obj");
-    Model our_model("LearnOpenGL/assets/models/obj/workshop/workshop.obj");
-    // Model our_model("LearnOpenGL/assets/models/obj/cyborg/cyborg.obj");
-    // GLTFModel castle("LearnOpenGL/assets/models/gltf/sponza_atrium/Sponza.gltf");
+    Model our_model("assets/models/obj/backpack/backpack.obj");
+    // Model our_model("assets/models/obj/rifle/MA5D_Assault_Rifle_v008.obj");
+    // Model our_model("assets/models/obj/workshop/workshop.obj");
+    // Model our_model("assets/models/obj/cyborg/cyborg.obj");
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
