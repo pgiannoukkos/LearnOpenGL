@@ -1,4 +1,5 @@
 #include "Mesh.h"
+#include "Log.h"
 
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<u32> indices, std::vector<Texture2D> textures)
 {
@@ -13,6 +14,7 @@ void Mesh::Draw(Shader& shader)
 {
     u32 diffuseNr = 1;
     u32 specularNr = 1;
+    u32 normalNr = 1;
 
     for (u32 i = 0; i < textures.size(); i++)
     {
@@ -27,6 +29,11 @@ void Mesh::Draw(Shader& shader)
         {
             number = std::to_string(specularNr++);
         }
+        else if (name == "texture_normal")
+        {
+            number = std::to_string(normalNr++);
+        }
+
 
         shader.SetInt(("material." + name + number).c_str(), i);
         // glBindTexture(GL_TEXTURE_2D, textures[i].id);
@@ -53,4 +60,8 @@ void Mesh::SetupMesh()
     vao.LinkAttrib(1, 3, GL_FLOAT, sizeof(Vertex), (void*)offsetof(Vertex, normal));
     // vertex texture coordinates
     vao.LinkAttrib(2, 2, GL_FLOAT, sizeof(Vertex), (void*)offsetof(Vertex, tex_coords));
+    // vertex tangent
+    vao.LinkAttrib(3, 3, GL_FLOAT, sizeof(Vertex), (void*)offsetof(Vertex, tangents));
+    // vertex bitangent
+    vao.LinkAttrib(4, 3, GL_FLOAT, sizeof(Vertex), (void*)offsetof(Vertex, bitangents));
 }
