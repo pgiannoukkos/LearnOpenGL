@@ -35,6 +35,8 @@
 build/
 .cache/
 
+!assets/
+
 imgui.ini
 LearnOpenGL/assets/models/backpack/source_attribution.txt
 compile_commands.json
