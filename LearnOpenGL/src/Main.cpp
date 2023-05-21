@@ -37,7 +37,7 @@ const int SCR_WIDTH = 1280;
 const int SCR_HEIGHT = static_cast<int>(SCR_WIDTH / ASPECT_RATIO);
 
 // camera
-Camera camera(glm::vec3(0.0f, 10.0f, 5.0f));
+Camera camera(glm::vec3(0.0f, 5.0f, 5.0f));
 float last_x = SCR_WIDTH / 2.0f;
 float last_y = SCR_HEIGHT / 2.0f;
 bool first_mouse = true;
@@ -116,12 +116,15 @@ int main()
     Shader shader("assets/shaders/normal_mapping_vs.glsl", "assets/shaders/normal_mapping_fs.glsl");
 
     // load models
-    // Model our_model("assets/models/obj/backpack/backpack.obj");
+    // Model backpack("assets/models/obj/backpack/backpack.obj");
     // Model our_model("assets/models/obj/rifle/MA5D_Assault_Rifle_v008.obj");
     // Model our_model("assets/models/obj/workshop/workshop.obj");
-    // Model our_model("assets/models/obj/cyborg/cyborg.obj");
+    Model cyborg("assets/models/obj/cyborg/cyborg.obj");
     // Model our_model("assets/models/obj/castle/castle.obj");
-    Model our_model("assets/models/obj/sponza/sponza.obj");
+    Model sponza("assets/models/obj/sponza/sponza.obj");
+    // Model our_model("assets/models/gltf/sponza_atrium/Sponza.gltf");
+    // Model our_model("assets/models/gltf/backpack/scene.gltf");
+    // Model our_model("assets/models/gltf/bmw/scene.gltf");
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
@@ -325,7 +328,13 @@ int main()
         shader.SetMat4("model", model);
         shader.SetVec3("viewPos", camera.m_Position);
         shader.SetVec3("lightPos", light_pos);
-        our_model.Draw(shader);
+        sponza.Draw(shader);
+
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, 0.0f, -20.0f));
+        model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
+        shader.SetMat4("model", model);
+        cyborg.Draw(shader);
 
         // render light source
         light_cube_shader.Use();
