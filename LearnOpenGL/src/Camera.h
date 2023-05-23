@@ -23,7 +23,7 @@ enum CameraMovement
 // Default camera values
 const f32 YAW = -90.0f;
 const f32 PITCH = 0.0;
-const f32 SPEED = 30.0f;
+const f32 SPEED = 5.0f;
 const f32 SENSITIVITY = 0.1f;
 const f32 ZOOM = 45.0f;
 
