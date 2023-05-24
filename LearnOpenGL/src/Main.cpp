@@ -99,7 +99,10 @@ int main()
     // configure global OpenGL state
     // -----------------------------
     glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);     // Always pass the depth test (same effect as glDisable(GL_DEPTH_TEST))
+    glDepthFunc(GL_LESS);
+    glEnable(GL_STENCIL_TEST);
+    glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
     // initialize ImGui
     // ----------------
@@ -108,7 +111,8 @@ int main()
 
     // build and compile shader program
     // --------------------------------
-    Shader shader("assets/shaders/depth_testing_vs.glsl", "assets/shaders/depth_testing_fs.glsl");
+    Shader shader("assets/shaders/stencil_testing_vs.glsl", "assets/shaders/stencil_testing_fs.glsl");
+    Shader shader_single_color("assets/shaders/stencil_testing_vs.glsl", "assets/shaders/stencil_single_color_fs.glsl");
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
@@ -220,10 +224,10 @@ int main()
     u32 rbo;
     glGenRenderbuffers(1, &rbo);
     glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, tex_width, tex_height);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, tex_width, tex_height);
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rbo);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
 
     // Check framebuffer completeness
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
@@ -253,14 +257,33 @@ int main()
 
         // clear the framebuffer's contents
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-        shader.Use();
+        shader_single_color.Use();
         glm::mat4 model = glm::mat4(1.0f);
         glm::mat4 view = camera.GetViewMatrix();
         glm::mat4 projection = glm::perspective(glm::radians(camera.m_Zoom), ASPECT_RATIO, 0.1f, 100.0f);
+        shader_single_color.SetMat4("view", view);
+        shader_single_color.SetMat4("projection", projection);
+
+        shader.Use();
         shader.SetMat4("view", view);
         shader.SetMat4("projection", projection);
+
+        // draw floor as normal, but don't write the floor to the stencil buffer, we only care about containers.
+        // we set its mask to 0x00 to not write the stencil buffer.
+        glStencilMask(0x00);
+
+        plane_vao.Bind();
+        plane_texture.Bind(0);
+        model = glm::mat4(1.0f);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        plane_vao.Unbind();
+        plane_texture.UnBind();
+
+        // 1st. render pass, draw objects as normal, writing to the stencil buffer.
+        glStencilFunc(GL_ALWAYS, 1, 0xFF);
+        glStencilMask(0xFF);
 
         // cubes
         cube_vao.Bind();
@@ -276,18 +299,43 @@ int main()
         cube_vao.Unbind();
         cube_texture.UnBind();
 
-        // floor
-        plane_vao.Bind();
-        plane_texture.Bind(0);
+        // 2nd. render pass: now draw slightly scaled versions of the objects, this time disabling stencil writing.
+        // Because the stencil buffer is now filled with several 1s. The parts of the buffer that are 1 are not drawn,
+        // thus only drawing the objects' size differences, making it look like borders.
+        glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+        glStencilMask(0x00);
+        glDisable(GL_DEPTH_TEST);
+
+        shader_single_color.Use();
+
+        float scale = 1.1f;
+
+        cube_vao.Bind();
+        cube_texture.Bind(0);
+
         model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(-1.0f, 0.0f, -1.0f));
+        model = glm::scale(model, glm::vec3(scale, scale, scale));
+        shader_single_color.SetMat4("model", model);
         glDrawArrays(GL_TRIANGLES, 0, 36);
-        plane_vao.Unbind();
-        plane_texture.UnBind();
+
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(scale, scale, scale));
+        shader_single_color.SetMat4("model", model);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        cube_vao.Unbind();
+        cube_texture.UnBind();
 
         // bind back to the default framebuffer
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glDisable(GL_DEPTH_TEST);
         glClear(GL_COLOR_BUFFER_BIT);
+
+        glStencilMask(0xFF);
+        glStencilFunc(GL_ALWAYS, 0, 0xFF);
+        glEnable(GL_DEPTH_TEST);
 
         // Start the Dear ImGui frame
         imgui_layer->Begin();

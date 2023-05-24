@@ -53,7 +53,7 @@ Shader::Shader(const char* vertex_path, const char* fragment_path)
     glGetShaderiv(vertex, GL_COMPILE_STATUS, &success);
     if (!success) {
         glGetShaderInfoLog(vertex, 512, NULL, info_log);
-        LOG_ERROR("Shader: Vertex Shader Compilation Failed.");
+        LOG_ERROR("Shader: Vertex Shader Compilation Failed.\n{0}", info_log);
         // std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << info_log << std::endl;
     }
 
@@ -66,7 +66,7 @@ Shader::Shader(const char* vertex_path, const char* fragment_path)
     glGetShaderiv(fragment, GL_COMPILE_STATUS, &success);
     if (!success) {
         glGetShaderInfoLog(fragment, 512, NULL, info_log);
-        LOG_ERROR("Shader: Fragment Shader Compilation Failed.");
+        LOG_ERROR("Shader: Fragment Shader Compilation Failed.\n{0}", info_log);
         // std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << info_log << std::endl;
     }
 
@@ -79,7 +79,7 @@ Shader::Shader(const char* vertex_path, const char* fragment_path)
     glGetProgramiv(id, GL_LINK_STATUS, &success);
     if (!success) {
         glGetProgramInfoLog(id, 512, NULL, info_log);
-        LOG_ERROR("Shader: Program Linkinkg Failed.");
+        LOG_ERROR("Shader: Program Linkinkg Failed.\n{0}", info_log);
         // std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << info_log << std::endl;
     }
 
