@@ -1,23 +1,40 @@
 {
-    "version": "2.0.0",
-    "tasks": [
-        {
-            "type": "cmake",
-            "label": "CMake: build",
-            "command": "build",
-            "targets": [
-                "LearnOpenGL"
-            ],
-            "group": "build",
-            "problemMatcher": [],
-            "detail": "CMake template build task"
-        },
-        {
-            "type": "cmake",
-            "label": "CMake: clean",
-            "command": "clean",
-            "problemMatcher": [],
-            "detail": "CMake template clean task"
-        }
-    ]
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "shell",
+			"label": "Configure Debug",
+			"command": "inv config --build-type=Debug",
+			"group": "build",
+			"problemMatcher": [],
+		},
+		{
+			"type": "shell",
+			"label": "Configure Release",
+			"command": "inv config --build-type=Release",
+			"group": "build",
+			"problemMatcher": [],
+		},
+		{
+			"type": "shell",
+			"label": "Build Debug",
+			"command": "inv build --build-type=Debug",
+			"group": "build",
+			"problemMatcher": [],
+		},
+		{
+			"type": "shell",
+			"label": "Build Release",
+			"command": "inv build --build-type=Release",
+			"group": "build",
+			"problemMatcher": [],
+		},
+		{
+			"type": "shell",
+			"label": "Clean",
+			"command": "inv clean",
+			"group": "build",
+			"problemMatcher": [],
+		}
+	]
 }
